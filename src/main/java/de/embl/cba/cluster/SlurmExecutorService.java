@@ -4,8 +4,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ClusterExecutorService implements ExecutorService
+public class SlurmExecutorService implements ExecutorService
 {
+    SlurmLoginSettings loginSettings;
+
+    public SlurmExecutorService( SlurmLoginSettings loginSettings )
+    {
+        this.loginSettings = loginSettings;
+    }
+
     public void shutdown()
     {
 
@@ -41,17 +48,22 @@ public class ClusterExecutorService implements ExecutorService
         return null;
     }
 
-    public Future< ? > submit( Runnable task )
+    public Future< ? > submit( Runnable runnable )
     {
-        if (task == null) throw new NullPointerException();
-        ClusterRunnableFuture clusterRunnableFuture = newClusterRunnableFuture( task );
+        ClusterRunnable clusterRunnable = new ClusterRunnable( runnable, this );
+        ClusterRunnableFuture clusterRunnableFuture = new ClusterRunnableFuture( clusterRunnable, this );
         execute( clusterRunnableFuture );
         return clusterRunnableFuture;
     }
 
-    protected ClusterRunnableFuture newClusterRunnableFuture( Runnable runnable )
+    public Future< ? > submit( SlurmJobScript jobScript )
     {
-            return new ClusterRunnableFuture( runnable );
+        SlurmJobFuture slurmJobFuture = new SlurmJobFuture( jobScript );
+        // executableCommands future
+        // return future
+
+        return clusterRunnableFuture;
+
     }
 
     public < T > List< Future< T > > invokeAll( Collection< ? extends Callable< T > > tasks ) throws InterruptedException
@@ -74,9 +86,22 @@ public class ClusterExecutorService implements ExecutorService
         return null;
     }
 
-    public void execute( Runnable command )
+    public void execute( Runnable runnable )
     {
-        // Here the command is submitted to the cluster by executing the run() method of command, which is a ClusterRunnableFuture
-
     }
+
+    private long submitJob( String jobText )
+    {
+        long jobID = 0;
+
+        // submit job on cluster and get jobID
+
+        return  jobID;
+    }
+
+    public String checkJobStatus( long jobID )
+    {
+        return null;
+    }
+
 }

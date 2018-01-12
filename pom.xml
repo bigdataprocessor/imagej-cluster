@@ -8,8 +8,20 @@
 	<groupId>embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.0.1</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-	<name>Fiji Slurm</name>
+    <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster<description>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -83,11 +95,18 @@
 	</parent>
 
 	<repositories>
+
 		<!-- NB: for SciJava dependencies -->
 		<repository>
 			<id>imagej.public</id>
 			<url>https://maven.imagej.net/content/groups/public</url>
 		</repository>
+
+		<repository>
+			<id>central</id>
+			<url>http://central.maven.org/maven2/</url>
+		</repository>
+
 	</repositories>
 
 	<dependencies>
@@ -111,6 +130,7 @@
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
 		</dependency>
+
 
 	</dependencies>
 

@@ -1,16 +1,17 @@
 package de.embl.cba.cluster;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public class ClusterRunnableFuture implements RunnableFuture
+public class SlurmJobFuture implements Future
 {
-    SlurmExecutorService slurmExecutorService;
-    ClusterRunnable clusterRunnable;
+    SlurmJobScript slurmJobScript;
 
-    public ClusterRunnableFuture( ClusterRunnable clusterRunnable, SlurmExecutorService slurmExecutorService )
+    public SlurmJobFuture( SlurmJobScript slurmJobScript )
     {
-        this.clusterRunnable = clusterRunnable;
-        this.slurmExecutorService = slurmExecutorService;
+        this.slurmJobScript = slurmJobScript;
     }
 
     public boolean cancel( boolean mayInterruptIfRunning )
@@ -25,7 +26,6 @@ public class ClusterRunnableFuture implements RunnableFuture
 
     public boolean isDone()
     {
-        slurmExecutorService.checkJobStatus( clusterRunnable.jobID );
         return false;
     }
 
@@ -37,10 +37,5 @@ public class ClusterRunnableFuture implements RunnableFuture
     public Object get( long timeout, TimeUnit unit ) throws InterruptedException, ExecutionException, TimeoutException
     {
         return null;
-    }
-
-    public void run()
-    {
-        clusterRunnable.run();
     }
 }
