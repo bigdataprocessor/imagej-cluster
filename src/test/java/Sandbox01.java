@@ -6,14 +6,12 @@ import de.embl.cba.cluster.SSHConnectorSettings;
 public class Sandbox01
 {
 
-    private static String remoteJobDirectory;
+    private static String remoteJobDirectoryAsMountedRemotely = "/g/cba/cluster/jobs";
+    private static String remoteJobDirectoryAsMountedLocally = "/Volumes/cba/cluster/jobs";
+
 
     public static void main ( String[] args )
     {
-
-        //remoteJobDirectory = "/g/cba/cluster/jobs";
-        remoteJobDirectory = "/Volumes/cba/cluster/jobs";
-
 
         // TODO: split up below logic even more: separate the script from the ImageJ
         ExecutableImageJGroovyScript executableScript = new ExecutableImageJGroovyScript( );
@@ -30,7 +28,7 @@ public class Sandbox01
         sshConnectorSettings.password = "OlexOlex";
         sshConnectorSettings.host = SSHConnectorSettings.EMBL_SLURM_HOST;
 
-        SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings, remoteJobDirectory );
+        SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings, remoteJobDirectoryAsMountedLocally, remoteJobDirectoryAsMountedRemotely );
         executorService.submit( jobScript );
 
 

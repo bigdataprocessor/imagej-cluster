@@ -5,6 +5,8 @@ import com.jcraft.jsch.*;
 import java.io.*;
 
 
+// TODO: saveTextAsFile -> how to do the error handling?
+
 public class SSHConnector
 {
     private SSHConnectorSettings loginSettings;
@@ -45,7 +47,7 @@ public class SSHConnector
     {
         connectSession();
         execute( command );
-        recordSystemResposeText();
+        recordSystemResponseText();
         disconnect();
 
         return systemResponseText;
@@ -57,13 +59,13 @@ public class SSHConnector
         session.disconnect();
     }
 
-    private void recordSystemResposeText() throws IOException, JSchException
+    private void recordSystemResponseText() throws IOException, JSchException
     {
-        InputStream in = channelExec.getInputStream();
-        channelExec.setErrStream( System.err );
+        InputStream out = channelExec.getInputStream();
+        InputStream err = channelExec.getErrStream();
         channelExec.connect();
-
-        systemResponseText = convertStreamToStr( in );
+        systemResponseText = convertStreamToStr( out );
+        systemResponseText += convertStreamToStr( err );
         System.out.println( systemResponseText );
     }
 
@@ -100,15 +102,6 @@ public class SSHConnector
     {
         String localTmpPath = localTmpDirectory + File.pathSeparator + remoteFileName;
         PrintWriter writer = new PrintWriter( localTmpPath, "UTF-8" );
-        writer.write( text);
-        writer.close();
-    }
-
-
-    public void saveTextAsFile( String text, String remoteFileName, String remoteDirectory ) throws Exception
-    {
-        String path = remoteDirectory + File.pathSeparator + remoteFileName;
-        PrintWriter writer = new PrintWriter( path, "UTF-8" );
         writer.write( text);
         writer.close();
     }

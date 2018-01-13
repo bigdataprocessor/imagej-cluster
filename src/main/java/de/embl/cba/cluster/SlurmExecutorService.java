@@ -1,9 +1,7 @@
 package de.embl.cba.cluster;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -14,13 +12,19 @@ import java.util.concurrent.*;
 public class SlurmExecutorService implements ExecutorService
 {
     private final SSHConnector sshConnector;
-    private final String remoteJobDirectory;
-    private String SUBMIT_SLURM_JOB_COMMAND = "sbatch ";
+    private final String remoteJobDirectoryAsMountedLocally;
+    private final String remoteJobDirectoryAsMountedRemotely;
 
-    public SlurmExecutorService( SSHConnectorSettings loginSettings, String remoteJobDirectory )
+    private final String SUBMIT_JOB_COMMAND = "sbatch ";
+    private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
+
+    public SlurmExecutorService( SSHConnectorSettings loginSettings,
+                                 String remoteJobDirectoryAsMountedLocally,
+                                 String remoteJobDirectoryAsMountedRemotely)
     {
         sshConnector = new SSHConnector( loginSettings );
-        this.remoteJobDirectory = remoteJobDirectory;
+        this.remoteJobDirectoryAsMountedLocally = remoteJobDirectoryAsMountedLocally;
+        this.remoteJobDirectoryAsMountedRemotely = remoteJobDirectoryAsMountedRemotely;
     }
 
     public void shutdown()
@@ -106,25 +110,45 @@ public class SlurmExecutorService implements ExecutorService
     {
     }
 
-    private long submitJob( SlurmJobFuture slurmJobFuture ) throws Exception
+    private boolean isRemoteServerConnectionWorking()
     {
+        // TODO implement within SSHConnector
+        //command = "touch /g/cba/cluster/"+Utils.timeStamp();
+        //command = "echo 'hello world'; sbatch echo 'hello world';";
 
-        String jobFileName = sshConnector.userName() + "--" + timeStamp() + ".sh";
-        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectory );
-        sshConnector.saveTextAsFile( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectory );
-
-        String remoteJobPath = remoteJobDirectory + File.separator + jobFileName;
-        sshConnector.executeCommand( SUBMIT_SLURM_JOB_COMMAND + remoteJobPath );
-
-        // get long jobID = 0;
-
-        return 0;
+        return true;
     }
 
-    private String timeStamp()
+    private long submitJob( SlurmJobFuture slurmJobFuture ) throws Exception
     {
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        return timeStamp;
+        String remoteJobPath = putJobFileOntoRemoteServer( slurmJobFuture );
+        String outAndErrSystemResponse = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobPath );
+
+        String response = outAndErrSystemResponse;
+
+        if ( ! response.contains( SUCCESSFUL_JOB_SUBMISSION_RESPONSE ) )
+        {
+            // Throw some error
+            return -1;
+        }
+        else
+        {
+            String tmp = response.replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" ).trim();
+            long jobID = Integer.parseInt( tmp );
+        }
+
+        return jobID;
+    }
+
+    private String putJobFileOntoRemoteServer( SlurmJobFuture slurmJobFuture )
+    {
+        String jobFileName = sshConnector.userName() + "--" + Utils.timeStamp() + ".sh";
+
+        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
+
+        Utils.saveTextAsFile( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedLocally );
+
+        return remoteJobDirectoryAsMountedRemotely + File.separator + jobFileName;
     }
 
     public String checkJobStatus( long jobID )
