@@ -1,19 +1,25 @@
 package de.embl.cba.cluster;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
+// TODO: set remote tmp dir via some default mechanism
+// TODO: option to submit job just as long string (easier than file)
+
+
 public class SlurmExecutorService implements ExecutorService
 {
     private final SSHConnector sshConnector;
     private final String remoteJobDirectory;
+    private String SUBMIT_SLURM_JOB_COMMAND = "sbatch ";
 
     public SlurmExecutorService( SSHConnectorSettings loginSettings, String remoteJobDirectory )
     {
         sshConnector = new SSHConnector( loginSettings );
-        // TODO: set remote tmp dir via some mechanism
         this.remoteJobDirectory = remoteJobDirectory;
     }
 
@@ -62,7 +68,16 @@ public class SlurmExecutorService implements ExecutorService
     public Future< ? > submit( SlurmJobScript jobScript )
     {
         SlurmJobFuture slurmJobFuture = new SlurmJobFuture( jobScript );
-        submitJob( slurmJobFuture );
+
+        try
+        {
+            submitJob( slurmJobFuture );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
         return slurmJobFuture;
 
     }
@@ -91,17 +106,25 @@ public class SlurmExecutorService implements ExecutorService
     {
     }
 
-    private long submitJob( SlurmJobFuture slurmJobFuture )
+    private long submitJob( SlurmJobFuture slurmJobFuture ) throws Exception
     {
 
-        Date now = new Date();
-        String jobFileName = sshConnector.userName() + "--" + now.toString() + ".sh";
-        sshConnector.saveTextAsFileOnRemoteServer( slurmJobFuture.getJobText(), jobFileName,  );
-        long jobID = 0;
+        String jobFileName = sshConnector.userName() + "--" + timeStamp() + ".sh";
+        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectory );
+        sshConnector.saveTextAsFile( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectory );
 
-        // submit job on cluster and get jobID
+        String remoteJobPath = remoteJobDirectory + File.separator + jobFileName;
+        sshConnector.executeCommand( SUBMIT_SLURM_JOB_COMMAND + remoteJobPath );
 
-        return  jobID;
+        // get long jobID = 0;
+
+        return 0;
+    }
+
+    private String timeStamp()
+    {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        return timeStamp;
     }
 
     public String checkJobStatus( long jobID )

@@ -41,6 +41,6 @@ public class SlurmJobFuture implements Future
 
     public String getJobText()
     {
-        slurmJobScript.getJobText()
+        return slurmJobScript.getJobText();
     }
 }

@@ -25,6 +25,17 @@ public class SSHConnector
         return loginSettings.user;
     }
 
+    private void connectSession() throws JSchException
+    {
+        JSch jsch = new JSch();
+        session = jsch.getSession( loginSettings.user, loginSettings.host, loginSettings.port );
+        session.setPassword( loginSettings.password );
+        session.setConfig( "StrictHostKeyChecking", "no" );
+        System.out.println( "Establishing Connection..." );
+        session.connect();
+        System.out.println( "Connection established." );
+    }
+
     public void setLocalTmpDirectory( String localTmpDirectory )
     {
         this.localTmpDirectory = localTmpDirectory;
@@ -32,8 +43,7 @@ public class SSHConnector
 
     public String executeCommand( String command ) throws JSchException, IOException
     {
-
-        connect();
+        connectSession();
         execute( command );
         recordSystemResposeText();
         disconnect();
@@ -63,28 +73,16 @@ public class SSHConnector
         channelExec.setCommand( command );
     }
 
-    private void connect() throws JSchException
-    {
-        JSch jsch = new JSch();
-        session = jsch.getSession( loginSettings.user, loginSettings.host, loginSettings.port );
-        session.setPassword( loginSettings.password );
-        session.setConfig( "StrictHostKeyChecking", "no" );
-        System.out.println( "Establishing Connection..." );
-        session.connect();
-        System.out.println( "Connection established." );
-    }
 
-
-    public void saveTextAsFileOnRemoteServer( String text,
-                                      String remoteFileName,
-                                      String remoteDirecory ) throws Exception
+    public void saveTextAsFileOnRemoteServerUsingSFTP( String text,
+                                                       String remoteFileName,
+                                                       String remoteDirecory ) throws Exception
     {
 
 
-        String localTmpPath = localTmpDirectory + File.pathSeparator + remoteFileName;
-        PrintWriter writer = new PrintWriter( localTmpPath, "UTF-8" );
-        writer.write( text);
-        writer.close();
+        generateLocalTmpFile( text, remoteFileName );
+
+        connectSession();
 
         ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
         channelSftp.connect();
@@ -95,12 +93,29 @@ public class SSHConnector
 
 
         channelSftp.disconnect();
-
     }
 
 
+    private void generateLocalTmpFile( String text, String remoteFileName ) throws FileNotFoundException, UnsupportedEncodingException
+    {
+        String localTmpPath = localTmpDirectory + File.pathSeparator + remoteFileName;
+        PrintWriter writer = new PrintWriter( localTmpPath, "UTF-8" );
+        writer.write( text);
+        writer.close();
+    }
+
+
+    public void saveTextAsFile( String text, String remoteFileName, String remoteDirectory ) throws Exception
+    {
+        String path = remoteDirectory + File.pathSeparator + remoteFileName;
+        PrintWriter writer = new PrintWriter( path, "UTF-8" );
+        writer.write( text);
+        writer.close();
+    }
+
     public void copyFile()
     {
+        /*
         System.out.println("Crating SFTP Channel.");
         ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
         channelSftp.connect();
@@ -113,6 +128,7 @@ public class SSHConnector
             System.out.println(line);
         br.close();
         channelSftp.disconnect();
+        */
 
     }
 

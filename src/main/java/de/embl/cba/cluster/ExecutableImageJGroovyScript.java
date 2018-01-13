@@ -6,8 +6,8 @@ import java.util.ArrayList;
 public class ExecutableImageJGroovyScript implements ExecutableCommands
 {
 
-    public final static String XVFB_DEFAULT = "xfvb -run";
-    public final static String IMAGEJ_DIRECTORY_ALMF_LINUX = "/g/almf/software/Fiji/";
+    public final static String XVFB_DEFAULT = "xvfb-run -a";
+    public final static String IMAGEJ_DIRECTORY_ALMF_LINUX = "/g/almf/software/Fiji.app/";
     public final static String RELATIVE_IMAGE_BINARY_PATH_ALMF_LINUX = "ImageJ-linux64";
 
     public String xvfb = XVFB_DEFAULT;
