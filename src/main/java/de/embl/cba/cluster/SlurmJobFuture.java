@@ -38,4 +38,9 @@ public class SlurmJobFuture implements Future
     {
         return null;
     }
+
+    public String getJobText()
+    {
+        slurmJobScript.getJobText()
+    }
 }

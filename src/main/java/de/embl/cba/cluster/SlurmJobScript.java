@@ -15,11 +15,11 @@ public class SlurmJobScript
     {
         String path = directory + File.pathSeparator + filename;
         PrintWriter writer = new PrintWriter( path, "UTF-8" );
-        writer.write( text() );
+        writer.write( getJobText() );
         writer.close();
     }
 
-    private String text()
+    public String getJobText()
     {
         ArrayList < String > lines = new ArrayList< String >(  );
 

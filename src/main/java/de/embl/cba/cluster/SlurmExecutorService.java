@@ -1,16 +1,20 @@
 package de.embl.cba.cluster;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
 
 public class SlurmExecutorService implements ExecutorService
 {
-    SlurmLoginSettings loginSettings;
+    private final SSHConnector sshConnector;
+    private final String remoteJobDirectory;
 
-    public SlurmExecutorService( SlurmLoginSettings loginSettings )
+    public SlurmExecutorService( SSHConnectorSettings loginSettings, String remoteJobDirectory )
     {
-        this.loginSettings = loginSettings;
+        sshConnector = new SSHConnector( loginSettings );
+        // TODO: set remote tmp dir via some mechanism
+        this.remoteJobDirectory = remoteJobDirectory;
     }
 
     public void shutdown()
@@ -50,19 +54,16 @@ public class SlurmExecutorService implements ExecutorService
 
     public Future< ? > submit( Runnable runnable )
     {
-        ClusterRunnable clusterRunnable = new ClusterRunnable( runnable, this );
-        ClusterRunnableFuture clusterRunnableFuture = new ClusterRunnableFuture( clusterRunnable, this );
-        execute( clusterRunnableFuture );
-        return clusterRunnableFuture;
+        // ISSUE: I could not make the Runnable concept work, as I had no good idea
+        // what the .run() method show do in a cluster context
+        return null;
     }
 
     public Future< ? > submit( SlurmJobScript jobScript )
     {
         SlurmJobFuture slurmJobFuture = new SlurmJobFuture( jobScript );
-        // executableCommands future
-        // return future
-
-        return clusterRunnableFuture;
+        submitJob( slurmJobFuture );
+        return slurmJobFuture;
 
     }
 
@@ -90,8 +91,12 @@ public class SlurmExecutorService implements ExecutorService
     {
     }
 
-    private long submitJob( String jobText )
+    private long submitJob( SlurmJobFuture slurmJobFuture )
     {
+
+        Date now = new Date();
+        String jobFileName = sshConnector.userName() + "--" + now.toString() + ".sh";
+        sshConnector.saveTextAsFileOnRemoteServer( slurmJobFuture.getJobText(), jobFileName,  );
         long jobID = 0;
 
         // submit job on cluster and get jobID
