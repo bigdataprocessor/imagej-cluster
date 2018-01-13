@@ -3,6 +3,7 @@ package de.embl.cba.cluster;
 import com.jcraft.jsch.*;
 
 import java.io.*;
+import java.util.ArrayList;
 
 
 // TODO: saveTextAsFile -> how to do the error handling?
@@ -13,7 +14,7 @@ public class SSHConnector
 
     private ChannelExec channelExec;
     private Session session;
-    private String systemResponseText;
+    private ArrayList< String > systemResponses;
     private String localTmpDirectory;
 
     public SSHConnector( SSHConnectorSettings loginSettings )
@@ -43,14 +44,14 @@ public class SSHConnector
         this.localTmpDirectory = localTmpDirectory;
     }
 
-    public String executeCommand( String command ) throws JSchException, IOException
+    public ArrayList<String> executeCommand( String command ) throws Exception
     {
         connectSession();
         execute( command );
         recordSystemResponseText();
         disconnect();
 
-        return systemResponseText;
+        return systemResponses;
     }
 
     private void disconnect()
@@ -63,10 +64,24 @@ public class SSHConnector
     {
         InputStream out = channelExec.getInputStream();
         InputStream err = channelExec.getErrStream();
+
         channelExec.connect();
-        systemResponseText = convertStreamToStr( out );
-        systemResponseText += convertStreamToStr( err );
-        System.out.println( systemResponseText );
+
+        String output = convertStreamToStr( out );
+        String error = convertStreamToStr( err );
+
+        systemResponses = new ArrayList< String >(  );
+        addToSystemResponses( output );
+        addToSystemResponses( error );
+    }
+
+    private void addToSystemResponses( String output )
+    {
+        String[] strings = output.split( "\n" );
+        for ( String string : strings )
+        {
+            systemResponses.add( string );
+        }
     }
 
     private void execute( String command ) throws JSchException

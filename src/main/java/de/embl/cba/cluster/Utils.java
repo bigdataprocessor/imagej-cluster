@@ -35,4 +35,11 @@ public abstract class Utils
         writer.write( text);
         writer.close();
     }
+
+    public static String getLastLine( String string )
+    {
+        String[] strings = string.split( "\n" );
+        String lastLine = strings[ strings.length - 1 ];
+        return lastLine;
+    }
 }

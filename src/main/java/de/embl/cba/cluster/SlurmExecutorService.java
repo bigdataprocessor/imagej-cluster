@@ -1,6 +1,10 @@
 package de.embl.cba.cluster;
 
+import com.jcraft.jsch.JSchException;
+
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
@@ -8,6 +12,7 @@ import java.util.concurrent.*;
 // TODO: set remote tmp dir via some default mechanism
 // TODO: option to submit job just as long string (easier than file)
 
+// https://www.rc.fas.harvard.edu/resources/documentation/convenient-slurm-commands/
 
 public class SlurmExecutorService implements ExecutorService
 {
@@ -16,7 +21,11 @@ public class SlurmExecutorService implements ExecutorService
     private final String remoteJobDirectoryAsMountedRemotely;
 
     private final String SUBMIT_JOB_COMMAND = "sbatch ";
+    private final String JOB_STATUS_COMMAND = "sacct -j ";
+
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
+    private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
+
 
     public SlurmExecutorService( SSHConnectorSettings loginSettings,
                                  String remoteJobDirectoryAsMountedLocally,
@@ -71,18 +80,17 @@ public class SlurmExecutorService implements ExecutorService
 
     public Future< ? > submit( SlurmJobScript jobScript )
     {
-        SlurmJobFuture slurmJobFuture = new SlurmJobFuture( jobScript );
+        Long jobID = submitJob( jobScript );
 
-        try
+        if ( jobID != null )
         {
-            submitJob( slurmJobFuture );
+            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, jobScript, jobID );
+            return slurmJobFuture;
         }
-        catch ( Exception e )
+        else
         {
-            e.printStackTrace();
+            return null;
         }
-
-        return slurmJobFuture;
 
     }
 
@@ -119,41 +127,65 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private long submitJob( SlurmJobFuture slurmJobFuture ) throws Exception
+    private Long submitJob( SlurmJobScript slurmJobScript )
     {
-        String remoteJobPath = putJobFileOntoRemoteServer( slurmJobFuture );
-        String outAndErrSystemResponse = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobPath );
+        String remoteJobPath = createJobFileOnRemoteServer( slurmJobScript );
 
-        String response = outAndErrSystemResponse;
-
-        if ( ! response.contains( SUCCESSFUL_JOB_SUBMISSION_RESPONSE ) )
-        {
-            // Throw some error
-            return -1;
-        }
-        else
-        {
-            String tmp = response.replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" ).trim();
-            long jobID = Integer.parseInt( tmp );
-        }
+        Long jobID = runJobScriptOnRemoteServer( remoteJobPath );
 
         return jobID;
+
     }
 
-    private String putJobFileOntoRemoteServer( SlurmJobFuture slurmJobFuture )
+    private Long runJobScriptOnRemoteServer( String remoteJobPath )
+    {
+        try
+        {
+            ArrayList< String > response = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobPath );
+
+            if ( response.get( 0 ).contains( SUCCESSFUL_JOB_SUBMISSION_RESPONSE ) )
+            {
+                String tmp = response.get( 0 ).replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" );
+                long jobID = Integer.parseInt( tmp.trim() );
+                return jobID;
+            }
+
+        }
+        catch ( Exception e )
+        {
+            //
+        }
+
+        return null;
+    }
+
+    public String jobStatus( long jobID )
+    {
+        String cmd = JOB_STATUS_COMMAND + jobID + " --format=State";
+
+        try
+        {
+            ArrayList< String > responses = sshConnector.executeCommand( cmd );
+            String lastResponse = responses.get( responses.size() - 1 );
+            return lastResponse;
+        }
+        catch ( Exception e )
+        {
+            return COULD_NOT_DETERMINE_JOB_STATUS;
+        }
+        
+    }
+
+    private String createJobFileOnRemoteServer( SlurmJobScript slurmJobScript )
     {
         String jobFileName = sshConnector.userName() + "--" + Utils.timeStamp() + ".sh";
 
         //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
-        Utils.saveTextAsFile( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedLocally );
+        Utils.saveTextAsFile( slurmJobScript.getJobText(), jobFileName, remoteJobDirectoryAsMountedLocally );
 
         return remoteJobDirectoryAsMountedRemotely + File.separator + jobFileName;
     }
 
-    public String checkJobStatus( long jobID )
-    {
-        return null;
-    }
 
 }

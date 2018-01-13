@@ -7,12 +7,17 @@ import java.util.concurrent.TimeoutException;
 
 public class SlurmJobFuture implements Future
 {
-    SlurmJobScript slurmJobScript;
+    SlurmJobScript jobScript;
+    SlurmExecutorService executorService;
+    long jobID;
 
-    public SlurmJobFuture( SlurmJobScript slurmJobScript )
+    public SlurmJobFuture( SlurmExecutorService executorService, SlurmJobScript jobScript, long jobID )
     {
-        this.slurmJobScript = slurmJobScript;
+        this.executorService = executorService;
+        this.jobScript = jobScript;
+        this.jobID = jobID;
     }
+
 
     public boolean cancel( boolean mayInterruptIfRunning )
     {
@@ -26,6 +31,7 @@ public class SlurmJobFuture implements Future
 
     public boolean isDone()
     {
+        executorService.jobStatus( jobID );
         return false;
     }
 
@@ -41,6 +47,6 @@ public class SlurmJobFuture implements Future
 
     public String getJobText()
     {
-        return slurmJobScript.getJobText();
+        return jobScript.getJobText();
     }
 }
