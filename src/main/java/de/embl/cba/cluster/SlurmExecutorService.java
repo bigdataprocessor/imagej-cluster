@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 
 // TODO: set remote tmp dir via some default mechanism
 // TODO: option to submit job just as long string (easier than file)
+// TODO: how to do the manageJobDependencies such that it is generic?
 
 // https://www.rc.fas.harvard.edu/resources/documentation/convenient-slurm-commands/
 
@@ -21,9 +22,9 @@ public class SlurmExecutorService implements ExecutorService
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
     private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
 
+
     private String remoteJobDirectory;
     private String remoteJobPath;
-
 
     public SlurmExecutorService( SSHConnectorSettings loginSettings )
     {
@@ -72,20 +73,28 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public Future< ? > submit( ImageJGroovyJob imageJGroovyJob )
+    public Future< ? > submit( ImageJGroovyScriptJob imageJGroovyScriptJob )
     {
-        Long jobID = submitJob( imageJGroovyJob );
 
+        prepareJobSubmission( imageJGroovyScriptJob );
+
+        Long jobID = runJobOnRemoteServer();
+
+        return createJobFuture( imageJGroovyScriptJob, jobID );
+
+    }
+
+    private Future< ? > createJobFuture( ImageJGroovyScriptJob imageJGroovyScriptJob, Long jobID )
+    {
         if ( jobID != null )
         {
-            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, imageJGroovyJob, jobID );
+            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, imageJGroovyScriptJob, jobID );
             return slurmJobFuture;
         }
         else
         {
             return null;
         }
-
     }
 
     public < T > List< Future< T > > invokeAll( Collection< ? extends Callable< T > > tasks ) throws InterruptedException
@@ -121,27 +130,25 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private Long submitJob( ImageJGroovyJob imageJGroovyJob )
+    private void prepareJobSubmission( ImageJGroovyScriptJob job )
     {
         setupRemoteJobDirectory();
 
-        imageJGroovyJob.setRemoteJobDirectory( remoteJobDirectory );
+        job.manageDependencies( this );
 
-        createJobFileOnRemoteServer( imageJGroovyJob.jobText() );
+        String jobFilename = createJobFileOnRemoteServer( job.jobText() );
 
-        Long jobID = runJobScriptOnRemoteServer( );
-
-        return jobID;
+        job.setSubmissionFilename( jobFilename );
 
     }
 
+
     private void setupRemoteJobDirectory()
     {
-
         try
         {
-            String directory = "mkdir /g/cba/cluster/" + sshConnector.userName();
-            sshConnector.executeCommand( directory );
+            String directory = "/g/cba/cluster/" + sshConnector.userName();
+            sshConnector.executeCommand( "mkdir " + directory );
             remoteJobDirectory = directory;
         }
         catch ( Exception e )
@@ -149,10 +156,9 @@ public class SlurmExecutorService implements ExecutorService
             e.printStackTrace();
         }
 
-
     }
 
-    private Long runJobScriptOnRemoteServer()
+    private Long runJobOnRemoteServer()
     {
         try
         {
@@ -191,24 +197,24 @@ public class SlurmExecutorService implements ExecutorService
 
     }
 
-    private void createJobFileOnRemoteServer( String jobText )
+    private String createJobFileOnRemoteServer( String jobText )
     {
-        String jobFileName = sshConnector.userName() + "--" + Utils.timeStamp() + ".sh";
+        String jobFileName = Utils.timeStamp() + "-job.sh";
 
         //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.jobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
-        Utils.saveTextAsFile( jobText, jobFileName, localMounting( remoteJobDirectory ) );
+        Utils.saveTextAsFile( jobText, jobFileName, Utils.localMounting( remoteJobDirectory ) );
 
         remoteJobPath = remoteJobDirectory + File.separator + jobFileName;
 
+        return jobFileName;
+
     }
 
-
-    private String localMounting( String directory )
+    public String getRemoteJobDirectory()
     {
-        String localMounting = remoteJobDirectory.replace( "/g/", "/Volumes/" );
-
-        return localMounting;
+        return remoteJobDirectory;
     }
+
 
 }

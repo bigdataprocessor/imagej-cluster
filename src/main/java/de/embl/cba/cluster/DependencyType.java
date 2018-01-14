@@ -3,5 +3,8 @@ package de.embl.cba.cluster;
 public enum DependencyType
 {
     Path,
-    SlurmModule
+    Directory,
+    SlurmModule,
+    Command,
+    Text
 }

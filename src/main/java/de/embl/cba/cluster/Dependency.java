@@ -9,4 +9,10 @@ public class Dependency
     public Object localObject;
     public Object remoteObject;
 
+
+    public void setLocalSource( Object localObject )
+    {
+        this.localObject = localObject;
+    }
+
 }

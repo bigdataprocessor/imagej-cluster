@@ -15,6 +15,7 @@ public class SlurmJobScript
     public long numWorkersPerNode;
     public String jobDirectory;
     public String queue;
+    public String jobRemoteFilename;
 
     public ArrayList< String > executableCommands;
 
@@ -31,8 +32,8 @@ public class SlurmJobScript
         ArrayList < String > lines = new ArrayList< String >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + jobDirectory + "/slurm.%N.%j.err " );
-        lines.add( "#SBATCH -o " + jobDirectory + "/slurm.%N.%j.out " );
+        lines.add( "#SBATCH -e " + jobDirectory + "/" + jobRemoteFilename + "--node-%N--jobId-%j.err" );
+        lines.add( "#SBATCH -o " + jobDirectory + "/" + jobRemoteFilename + "--node-%N--jobId-%j.out" );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );
