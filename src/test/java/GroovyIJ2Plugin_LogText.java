@@ -1,15 +1,17 @@
 import de.embl.cba.cluster.*;
 
+import java.io.File;
 import java.io.IOException;
 
-public class GroovyIJ2Plugin_LogText
+public class GroovyIJ2Plugin_logText
 {
 
     public static void main ( String[] args ) throws IOException
     {
 
         ImageJGroovyScriptJob imageJGroovyScriptJob = new ImageJGroovyScriptJob();
-        imageJGroovyScriptJob.setLocalDependencyGroovyScriptNameAndText( "logText.groovy", Utils.readTextFile( "/Users/tischer/Documents/fiji-slurm/src/test/resources", "IJ2plugin_logText.groovy" ) );
+        imageJGroovyScriptJob.setLocalGroovyScript( new File( "/Users/tischer/Documents/fiji-slurm/src/test/resources/IJ2plugin_logText.groovy" ));
+        //imageJGroovyScriptJob.setLocalGroovyScript(  "/Users/tischer/Documents/fiji-slurm/src/test/resources", "ij2plugin-rotate-image.groovy" );
 
         SSHConnectorSettings sshConnectorSettings = new SSHConnectorSettings();
         sshConnectorSettings.user = "tischer";
@@ -17,7 +19,14 @@ public class GroovyIJ2Plugin_LogText
         sshConnectorSettings.host = SSHConnectorSettings.EMBL_SLURM_HOST;
 
         SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings );
-        executorService.submit( imageJGroovyScriptJob );
+        SlurmJobFuture future = executorService.submit( imageJGroovyScriptJob );
+
+        for ( int i = 0; i < 10; ++i )
+        {
+            String status = future.status();
+            System.out.print( "Job status: " + status );
+        }
 
     }
+
 }

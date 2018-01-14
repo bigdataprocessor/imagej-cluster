@@ -32,8 +32,8 @@ public class SlurmJobScript
         ArrayList < String > lines = new ArrayList< String >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + jobDirectory + "/" + jobRemoteFilename + "--node-%N--jobId-%j.err" );
-        lines.add( "#SBATCH -o " + jobDirectory + "/" + jobRemoteFilename + "--node-%N--jobId-%j.out" );
+        lines.add( "#SBATCH -e " + jobDirectory + "/" + jobRemoteFilename + "--node_%N--id_%j.err" );
+        lines.add( "#SBATCH -o " + jobDirectory + "/" + jobRemoteFilename + "--node_%N--id_%j.out" );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );

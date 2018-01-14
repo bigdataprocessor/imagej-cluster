@@ -1,5 +1,7 @@
 package de.embl.cba.cluster;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -8,14 +10,20 @@ import java.util.Map;
 public class ImageJGroovyScriptJob
 {
     public LinkedHashMap< String, Dependency > dependencies;
-    public static final String JAVA_DEPENDENCY = "Java";
-    public static final String X11_DEPENDENCY = "X11";
-    public static final String XVFB_DEPENDENCY = "Xvfb";
-    public static final String IMAGEJ_DEPENDENCY = "ImageJ";
+    public static final String JAVA = "Java";
+    public static final String X11 = "X11";
+    public static final String XVFB = "Xvfb";
+    public static final String IMAGEJ = "ImageJ";
     public static final String REMOTE_JOB_DIRECTORY_DEPENDENCY = "JobDir";
-    public static final String GROOVY_SCRIPT_DEPENDENCY = "GroovyScript";
+    public static final String GROOVY_SCRIPT = "GroovyScript";
+
+    // Groovy script dependencies / parameters
+    // TODO: how to set them properly?
+    public static final String INPUT_IMAGE = "IMAGE_FILE";
+    public static final String OUTPUT_DIRECTORY = "OUTPUT_DIRECTORY";
 
     private String groovyScriptName = "script.groovy";
+    private Map< String, String > groovyScriptParameters = new HashMap< String, String >(  );
 
     private SlurmJobScript slurmJobScript;
 
@@ -24,7 +32,7 @@ public class ImageJGroovyScriptJob
     public ImageJGroovyScriptJob(  )
     {
         configureJobScript();
-        configureDependencies();
+        addDependencies();
     }
 
     private void configureJobScript()
@@ -35,7 +43,7 @@ public class ImageJGroovyScriptJob
         slurmJobScript.numWorkersPerNode = 4;
     }
 
-    private void configureDependencies()
+    private void addDependencies()
     {
         this.dependencies = new LinkedHashMap< String, Dependency >(  );
 
@@ -45,9 +53,23 @@ public class ImageJGroovyScriptJob
         addXVFBDependency();
         addGroovyScriptDependency();
         addImageJDependency();
-        // XVFB
-        // IMAGEJ
+        addInputImageDependency();
+        addOutputDirectoryDependency();
 
+    }
+
+    public void manageDependencies( SlurmExecutorService executorService ) throws IOException
+    {
+        manageJobDirectoryDependency( executorService.getRemoteJobDirectory() );
+        manageGroovyScriptDependency( executorService.getRemoteJobDirectory() );
+        manageInputImageDependency( executorService.getRemoteJobDirectory() );
+        manageOutputDirectoryDependency( executorService.getRemoteJobDirectory() );
+    }
+
+
+    public void addGroovyScriptParameter( String key, String value )
+    {
+        groovyScriptParameters.put( key, value );
     }
 
     private void addJavaDependency()
@@ -55,7 +77,7 @@ public class ImageJGroovyScriptJob
         Dependency dependency = new Dependency();
         dependency.remoteType = DependencyType.SlurmModule;
         dependency.remoteObject = "module load Java";
-        dependencies.put( JAVA_DEPENDENCY, dependency );
+        dependencies.put( JAVA, dependency );
     }
 
     private void addX11Dependency()
@@ -63,7 +85,7 @@ public class ImageJGroovyScriptJob
         Dependency dependency = new Dependency();
         dependency.remoteType = DependencyType.SlurmModule;
         dependency.remoteObject = "module load X11";
-        dependencies.put( X11_DEPENDENCY, dependency );
+        dependencies.put( X11, dependency );
     }
 
     private void addXVFBDependency()
@@ -71,7 +93,7 @@ public class ImageJGroovyScriptJob
         Dependency dependency = new Dependency();
         dependency.remoteType = DependencyType.Command;
         dependency.remoteObject = "xvfb-run -a";
-        dependencies.put( XVFB_DEPENDENCY, dependency );
+        dependencies.put( XVFB, dependency );
     }
 
     private void addRemoteJobDirectoryDependency()
@@ -89,7 +111,7 @@ public class ImageJGroovyScriptJob
         dependency.localObject = null;
         dependency.remoteType = DependencyType.Path;
         dependency.remoteObject = null;
-        dependencies.put( GROOVY_SCRIPT_DEPENDENCY, dependency );
+        dependencies.put( GROOVY_SCRIPT, dependency );
     }
 
     private void addImageJDependency()
@@ -99,42 +121,78 @@ public class ImageJGroovyScriptJob
         dependency.localObject = null;
         dependency.remoteType = DependencyType.Path;
         dependency.remoteObject = "/g/almf/software/Fiji/ImageJ-linux64";
-        dependencies.put( IMAGEJ_DEPENDENCY, dependency );
+        dependencies.put( IMAGEJ, dependency );
+    }
+
+    private void addOutputDirectoryDependency()
+    {
+        Dependency dependency = new Dependency();
+        dependency.remoteType = DependencyType.Directory;
+        dependency.remoteObject = null;
+        dependencies.put( OUTPUT_DIRECTORY, dependency );
+    }
+
+    private void addInputImageDependency()
+    {
+        Dependency dependency = new Dependency();
+        dependency.localType = DependencyType.File;
+        dependency.localObject = null;
+        dependency.remoteType = DependencyType.Path;
+        dependency.remoteObject = null;
+        dependencies.put( INPUT_IMAGE, dependency );
     }
 
     private ArrayList< String > jobScriptCommands()
     {
         ArrayList< String > commands = new ArrayList< String >(  );
 
-        commands.add( (String) dependencies.get( JAVA_DEPENDENCY ).remoteObject );
-        commands.add( (String) dependencies.get( X11_DEPENDENCY ).remoteObject );
+        commands.add( (String) dependencies.get( JAVA ).remoteObject );
+        commands.add( (String) dependencies.get( X11 ).remoteObject );
 
-        String command = dependencies.get( XVFB_DEPENDENCY ).remoteObject
-                + " " + dependencies.get( IMAGEJ_DEPENDENCY ).remoteObject
-                + " " + dependencies.get( GROOVY_SCRIPT_DEPENDENCY ).remoteObject;
+        String command = dependencies.get( XVFB ).remoteObject
+                + " " + dependencies.get( IMAGEJ ).remoteObject
+                + " " + dependencies.get( GROOVY_SCRIPT ).remoteObject;
 
-        commands.add( command );
+        String scriptParameters = " \""
+                + INPUT_IMAGE + "='" + dependencies.get( INPUT_IMAGE ).remoteObject + "'"
+                + "," + "ANGLE_IN_DEGREES=50"
+                + "," + OUTPUT_DIRECTORY + "='" + dependencies.get( OUTPUT_DIRECTORY ).remoteObject + "'"
+                + "\"";
+
+        commands.add( command + scriptParameters );
 
         return commands;
 
     }
 
-    public void manageDependencies( SlurmExecutorService executorService )
-    {
-        manageJobDirectoryDependency( executorService.getRemoteJobDirectory() );
-        manageGroovyScriptDependency( executorService.getRemoteJobDirectory() );
-    }
 
     private void manageGroovyScriptDependency( String remoteJobDirectory )
     {
-        Utils.saveTextAsFile( getLocalDependencyGroovyScriptText(), getGroovyScriptName(), Utils.localMounting( remoteJobDirectory ) );
+        Utils.saveTextAsFile( getLocalDependencyGroovyScriptText(), groovyScriptName, Utils.localMounting( remoteJobDirectory ) );
         String remoteScriptPath = remoteJobDirectory + "/" + getGroovyScriptName();
         setRemoteDependencyGroovyScriptPath( remoteScriptPath );
     }
 
+    private void manageInputImageDependency( String remoteJobDirectory ) throws IOException
+    {
+        File localImageFile = (File) dependencies.get( INPUT_IMAGE ).localObject;
+
+        String remoteImagePath = Utils.localMounting( remoteJobDirectory ) + "/" + localImageFile.getName();
+        File remoteImageFile = new File( remoteImagePath );
+
+        Utils.copyFileUsingStream( localImageFile, remoteImageFile );
+
+        dependencies.get( INPUT_IMAGE ).remoteObject = remoteImageFile;
+    }
+
     private void manageJobDirectoryDependency( String remoteJobDirectory )
     {
-        setRemoteDependencyJobDirectory( remoteJobDirectory );
+        dependencies.get( REMOTE_JOB_DIRECTORY_DEPENDENCY ).remoteObject = remoteJobDirectory;
+    }
+
+    private void manageOutputDirectoryDependency( String remoteJobDirectory )
+    {
+        dependencies.get( OUTPUT_DIRECTORY ).remoteObject = remoteJobDirectory;
     }
 
     public String jobText()
@@ -148,19 +206,16 @@ public class ImageJGroovyScriptJob
         return slurmJobScript.jobText();
     }
 
-    private void setRemoteDependencyJobDirectory( String directory )
+    public void setLocalGroovyScript( File file ) throws IOException
     {
-        Dependency dependency = dependencies.get( REMOTE_JOB_DIRECTORY_DEPENDENCY );
-        dependency.remoteObject = directory;
+        groovyScriptName = file.getName();
+        String scriptText = Utils.readTextFile( file.getParent(), file.getName() );
+        dependencies.get( GROOVY_SCRIPT ).localObject = scriptText;
     }
 
-    public void setLocalDependencyGroovyScriptNameAndText( String name, String text )
+    public void setLocalInputImage( File file )
     {
-        Dependency dependency = dependencies.get( GROOVY_SCRIPT_DEPENDENCY );
-        Map< String, String > map = new HashMap<String, String>(  );
-        map.put("name", name);
-        map.put("text", text);
-        dependency.localObject = map;
+        dependencies.get( INPUT_IMAGE ).localObject = file;
     }
 
     public String getGroovyScriptName( )
@@ -170,18 +225,18 @@ public class ImageJGroovyScriptJob
 
     private String getLocalDependencyGroovyScriptText( )
     {
-        Dependency dependency = dependencies.get( GROOVY_SCRIPT_DEPENDENCY );
-        String text = ((Map<String,String>) dependency.localObject).get("text");
+        Dependency dependency = dependencies.get( GROOVY_SCRIPT );
+        String text = (String) dependency.localObject;
         return text;
     }
 
     private void setRemoteDependencyGroovyScriptPath( String path )
     {
-        Dependency dependency = dependencies.get( GROOVY_SCRIPT_DEPENDENCY );
+        Dependency dependency = dependencies.get( GROOVY_SCRIPT );
         dependency.remoteObject = path;
     }
 
-    public void setSubmissionFilename( String submissionName )
+    public void setJobFilename( String submissionName )
     {
         this.jobRemoteFilename = submissionName;
     }

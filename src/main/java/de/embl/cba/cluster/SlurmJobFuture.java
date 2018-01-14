@@ -35,6 +35,13 @@ public class SlurmJobFuture implements Future
         return false;
     }
 
+    public String status()
+    {
+        return executorService.jobStatus( jobID );
+    }
+
+
+
     public Object get() throws InterruptedException, ExecutionException
     {
         return null;

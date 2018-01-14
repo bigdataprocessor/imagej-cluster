@@ -1,6 +1,7 @@
 package de.embl.cba.cluster;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +26,7 @@ public class SlurmExecutorService implements ExecutorService
 
     private String remoteJobDirectory;
     private String remoteJobPath;
+    private String currentJobFileName;
 
     public SlurmExecutorService( SSHConnectorSettings loginSettings )
     {
@@ -73,7 +75,7 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public Future< ? > submit( ImageJGroovyScriptJob imageJGroovyScriptJob )
+    public SlurmJobFuture submit( ImageJGroovyScriptJob imageJGroovyScriptJob ) throws IOException
     {
 
         prepareJobSubmission( imageJGroovyScriptJob );
@@ -84,7 +86,7 @@ public class SlurmExecutorService implements ExecutorService
 
     }
 
-    private Future< ? > createJobFuture( ImageJGroovyScriptJob imageJGroovyScriptJob, Long jobID )
+    private SlurmJobFuture createJobFuture( ImageJGroovyScriptJob imageJGroovyScriptJob, Long jobID )
     {
         if ( jobID != null )
         {
@@ -130,15 +132,15 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private void prepareJobSubmission( ImageJGroovyScriptJob job )
+    private void prepareJobSubmission( ImageJGroovyScriptJob job ) throws IOException
     {
         setupRemoteJobDirectory();
+        setupRemoteJobFilename();
 
         job.manageDependencies( this );
+        job.setJobFilename( currentJobFileName );
 
-        String jobFilename = createJobFileOnRemoteServer( job.jobText() );
-
-        job.setSubmissionFilename( jobFilename );
+        createJobFileOnRemoteServer( job.jobText() );
 
     }
 
@@ -187,7 +189,7 @@ public class SlurmExecutorService implements ExecutorService
         try
         {
             ArrayList< String > responses = sshConnector.executeCommand( cmd );
-            String lastResponse = responses.get( responses.size() - 1 );
+            String lastResponse = responses.get( responses.size() - 2 );
             return lastResponse;
         }
         catch ( Exception e )
@@ -197,18 +199,20 @@ public class SlurmExecutorService implements ExecutorService
 
     }
 
-    private String createJobFileOnRemoteServer( String jobText )
+    private void createJobFileOnRemoteServer( String jobText )
     {
-        String jobFileName = Utils.timeStamp() + "-job.sh";
 
         //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.jobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
-        Utils.saveTextAsFile( jobText, jobFileName, Utils.localMounting( remoteJobDirectory ) );
+        Utils.saveTextAsFile( jobText, currentJobFileName, Utils.localMounting( remoteJobDirectory ) );
 
-        remoteJobPath = remoteJobDirectory + File.separator + jobFileName;
+        remoteJobPath = remoteJobDirectory + File.separator + currentJobFileName;
 
-        return jobFileName;
+    }
 
+    private void setupRemoteJobFilename()
+    {
+        currentJobFileName = Utils.timeStamp() + "-job.sh";
     }
 
     public String getRemoteJobDirectory()
