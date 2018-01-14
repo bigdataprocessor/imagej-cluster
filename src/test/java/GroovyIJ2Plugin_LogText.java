@@ -11,11 +11,10 @@ public class GroovyIJ2Plugin_logText
 
         ImageJGroovyScriptJob imageJGroovyScriptJob = new ImageJGroovyScriptJob();
         imageJGroovyScriptJob.setLocalGroovyScript( new File( "/Users/tischer/Documents/fiji-slurm/src/test/resources/IJ2plugin_logText.groovy" ));
-        //imageJGroovyScriptJob.setLocalGroovyScript(  "/Users/tischer/Documents/fiji-slurm/src/test/resources", "ij2plugin-rotate-image.groovy" );
 
         SSHConnectorSettings sshConnectorSettings = new SSHConnectorSettings();
         sshConnectorSettings.user = "tischer";
-        sshConnectorSettings.password = "OlexOlex";
+        sshConnectorSettings.password = "pwd";
         sshConnectorSettings.host = SSHConnectorSettings.EMBL_SLURM_HOST;
 
         SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings );

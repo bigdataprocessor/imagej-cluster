@@ -18,7 +18,7 @@ public class GroovyIJ2Plugin_rotateImageBy50degrees
 
         SSHConnectorSettings sshConnectorSettings = new SSHConnectorSettings();
         sshConnectorSettings.user = "tischer";
-        sshConnectorSettings.password = "OlexOlex";
+        sshConnectorSettings.password = "pwd";
         sshConnectorSettings.host = SSHConnectorSettings.EMBL_SLURM_HOST;
 
         SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings );
