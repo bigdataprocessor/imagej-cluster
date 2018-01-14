@@ -7,14 +7,14 @@ import java.util.concurrent.TimeoutException;
 
 public class SlurmJobFuture implements Future
 {
-    SlurmJobScript jobScript;
+    ImageJGroovyJob imageJGroovyJob;
     SlurmExecutorService executorService;
     long jobID;
 
-    public SlurmJobFuture( SlurmExecutorService executorService, SlurmJobScript jobScript, long jobID )
+    public SlurmJobFuture( SlurmExecutorService executorService, ImageJGroovyJob imageJGroovyJob, long jobID )
     {
         this.executorService = executorService;
-        this.jobScript = jobScript;
+        this.imageJGroovyJob = imageJGroovyJob;
         this.jobID = jobID;
     }
 
@@ -45,8 +45,4 @@ public class SlurmJobFuture implements Future
         return null;
     }
 
-    public String getJobText()
-    {
-        return jobScript.getJobText();
-    }
 }

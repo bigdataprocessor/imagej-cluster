@@ -1,9 +1,6 @@
 package de.embl.cba.cluster;
 
-import com.jcraft.jsch.JSchException;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +14,6 @@ import java.util.concurrent.*;
 public class SlurmExecutorService implements ExecutorService
 {
     private final SSHConnector sshConnector;
-    private final String remoteJobDirectoryAsMountedLocally;
-    private final String remoteJobDirectoryAsMountedRemotely;
 
     private final String SUBMIT_JOB_COMMAND = "sbatch ";
     private final String JOB_STATUS_COMMAND = "sacct -j ";
@@ -26,14 +21,13 @@ public class SlurmExecutorService implements ExecutorService
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
     private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
 
+    private String remoteJobDirectory;
+    private String remoteJobPath;
 
-    public SlurmExecutorService( SSHConnectorSettings loginSettings,
-                                 String remoteJobDirectoryAsMountedLocally,
-                                 String remoteJobDirectoryAsMountedRemotely)
+
+    public SlurmExecutorService( SSHConnectorSettings loginSettings )
     {
         sshConnector = new SSHConnector( loginSettings );
-        this.remoteJobDirectoryAsMountedLocally = remoteJobDirectoryAsMountedLocally;
-        this.remoteJobDirectoryAsMountedRemotely = remoteJobDirectoryAsMountedRemotely;
     }
 
     public void shutdown()
@@ -78,13 +72,13 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public Future< ? > submit( SlurmJobScript jobScript )
+    public Future< ? > submit( ImageJGroovyJob imageJGroovyJob )
     {
-        Long jobID = submitJob( jobScript );
+        Long jobID = submitJob( imageJGroovyJob );
 
         if ( jobID != null )
         {
-            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, jobScript, jobID );
+            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, imageJGroovyJob, jobID );
             return slurmJobFuture;
         }
         else
@@ -127,17 +121,38 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private Long submitJob( SlurmJobScript slurmJobScript )
+    private Long submitJob( ImageJGroovyJob imageJGroovyJob )
     {
-        String remoteJobPath = createJobFileOnRemoteServer( slurmJobScript );
+        setupRemoteJobDirectory();
 
-        Long jobID = runJobScriptOnRemoteServer( remoteJobPath );
+        imageJGroovyJob.setRemoteJobDirectory( remoteJobDirectory );
+
+        createJobFileOnRemoteServer( imageJGroovyJob.jobText() );
+
+        Long jobID = runJobScriptOnRemoteServer( );
 
         return jobID;
 
     }
 
-    private Long runJobScriptOnRemoteServer( String remoteJobPath )
+    private void setupRemoteJobDirectory()
+    {
+
+        try
+        {
+            String directory = "mkdir /g/cba/cluster/" + sshConnector.userName();
+            sshConnector.executeCommand( directory );
+            remoteJobDirectory = directory;
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private Long runJobScriptOnRemoteServer()
     {
         try
         {
@@ -173,19 +188,27 @@ public class SlurmExecutorService implements ExecutorService
         {
             return COULD_NOT_DETERMINE_JOB_STATUS;
         }
-        
+
     }
 
-    private String createJobFileOnRemoteServer( SlurmJobScript slurmJobScript )
+    private void createJobFileOnRemoteServer( String jobText )
     {
         String jobFileName = sshConnector.userName() + "--" + Utils.timeStamp() + ".sh";
 
-        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
+        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.jobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
-        Utils.saveTextAsFile( slurmJobScript.getJobText(), jobFileName, remoteJobDirectoryAsMountedLocally );
+        Utils.saveTextAsFile( jobText, jobFileName, localMounting( remoteJobDirectory ) );
 
-        return remoteJobDirectoryAsMountedRemotely + File.separator + jobFileName;
+        remoteJobPath = remoteJobDirectory + File.separator + jobFileName;
+
     }
 
+
+    private String localMounting( String directory )
+    {
+        String localMounting = remoteJobDirectory.replace( "/g/", "/Volumes/" );
+
+        return localMounting;
+    }
 
 }
