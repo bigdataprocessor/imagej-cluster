@@ -5,6 +5,9 @@ import de.embl.cba.cluster.SlurmExecutorService;
 public class ImageJCommandSlurmJob implements SlurmJob
 {
 
+    public static final String ALMF_CLUSTER_IMAGEJ_CMD = "/g/almf/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run";
+    public static final String CBA_CLUSTER_IMAGEJ_CMD = "/g/cba/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run";
+
     private String commandAndParameters;
 
     public ImageJCommandSlurmJob( String commandAndParameters)

@@ -9,11 +9,11 @@ import org.scijava.plugin.Plugin;
 public class LogTextPlugin implements Command
 {
     @Parameter(label = "Please enter some text", required = true )
-    public String name;
+    public String text;
 
     public void run()
     {
-        IJ.log( "You entered: " + name  );
+        IJ.log( "You entered: " + text );
     }
 
 }

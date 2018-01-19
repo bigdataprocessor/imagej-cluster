@@ -13,10 +13,10 @@ import org.scijava.widget.TextWidget;
 
 import java.io.IOException;
 
-@Plugin(type = Command.class, menuPath = "Plugins>EMBL-CBA>Cluster Command Runner" )
+@Plugin(type = Command.class, menuPath = "Plugins>EMBL>Cluster Command Runner" )
 public class SlurmCommandRunnerPlugin implements Command
 {
-    @Parameter(label = "User name" )
+    @Parameter(label = "User text" )
     private String username;
 
     @Parameter(label = "Password", style = TextWidget.PASSWORD_STYLE )
@@ -36,7 +36,6 @@ public class SlurmCommandRunnerPlugin implements Command
 
         SlurmJobFuture future = submitJob( imageJCommandSlurmJob, executorService );
 
-        
         try
         {
             SlurmJobStatus.monitorJobStatusAndShowOutAndErrWhenDone( future );

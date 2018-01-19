@@ -3,6 +3,7 @@ package de.embl.cba.cluster;
 import de.embl.cba.cluster.job.SlurmJob;
 import de.embl.cba.cluster.ssh.SSHConnector;
 import de.embl.cba.cluster.ssh.SSHConnectorSettings;
+import net.imglib2.Localizable;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,7 +94,6 @@ public class SlurmExecutorService implements ExecutorService
         return createJobFuture( slurmJob, jobID );
     }
 
-
     private void registerJob( long jobID )
     {
         jobErrorPath.put( jobID, getCurrentJobErrorPath() );
@@ -148,13 +148,16 @@ public class SlurmExecutorService implements ExecutorService
 
     private void prepareJobSubmission( SlurmJob job ) throws IOException
     {
+        Logger.log( "Preparing job submission..." );
         setupRemoteJobDirectory();
         setupRemoteJobFilename();
         createJobFileOnRemoteServer( job.getJobText( this ) );
+        Logger.done();
     }
 
     private void setupRemoteJobDirectory()
     {
+        Logger.log( "Creating remote job directory via SSH..." );
         try
         {
             String directory = "/g/cba/cluster/" + sshConnector.userName();
@@ -165,22 +168,23 @@ public class SlurmExecutorService implements ExecutorService
         {
             e.printStackTrace();
         }
+        Logger.done();
 
     }
 
     public String readJobOutput( long jobID ) throws IOException
     {
-        return Utils.readTextFile( jobOutputPath.get( jobID ) );
+        return Utils.readTextFile( Utils.localMounting( jobOutputPath.get( jobID ) ));
     }
 
-    public String getJobError( long jobID ) throws IOException
+    public String readJobError( long jobID ) throws IOException
     {
-        return Utils.readTextFile( jobErrorPath.get( jobID ) );
+        return Utils.readTextFile( Utils.localMounting( jobErrorPath.get( jobID ) ) );
     }
-
 
     private Long runJobOnRemoteServer()
     {
+        Logger.log( "Submitting job..." );
         try
         {
             ArrayList< String > response = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobPath );
@@ -189,6 +193,7 @@ public class SlurmExecutorService implements ExecutorService
             {
                 String tmp = response.get( 0 ).replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" );
                 long jobID = Integer.parseInt( tmp.trim() );
+                Logger.log( "...done." );
                 return jobID;
             }
 
@@ -209,7 +214,7 @@ public class SlurmExecutorService implements ExecutorService
         {
             ArrayList< String > responses = sshConnector.executeCommand( cmd );
             String lastResponse = responses.get( responses.size() - 2 );
-            return lastResponse;
+            return lastResponse.trim();
         }
         catch ( Exception e )
         {
@@ -239,18 +244,16 @@ public class SlurmExecutorService implements ExecutorService
         return remoteJobDirectory;
     }
 
-    public static final String NODE_ID_PATTERN = "--node_%N--id_%j";
 
     public String getCurrentJobOutputPath()
     {
-        return remoteJobDirectory + "/" + currentJobFileName + NODE_ID_PATTERN + ".out" ;
+        return remoteJobDirectory + "/" + currentJobFileName + ".out" ;
     }
 
     public String getCurrentJobErrorPath()
     {
-        return remoteJobDirectory + "/" + currentJobFileName + NODE_ID_PATTERN + ".err" ;
+        return remoteJobDirectory + "/" + currentJobFileName + ".err" ;
     }
-
 
     public String getCurrentJobFileName()
     {

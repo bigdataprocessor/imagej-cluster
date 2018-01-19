@@ -9,4 +9,12 @@ public class Logger
     {
         IJ.log( text );
     }
+
+
+    public static void done( )
+    {
+        IJ.log( "done." );
+    }
+
+
 }

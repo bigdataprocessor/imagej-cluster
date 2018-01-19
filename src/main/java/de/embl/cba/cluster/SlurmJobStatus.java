@@ -4,24 +4,39 @@ import java.io.IOException;
 
 public abstract class SlurmJobStatus
 {
-    public static final String COMPLETED = " COMPLETED";
+    public static final String COMPLETED = "COMPLETED";
 
     public static void monitorJobStatusAndShowOutAndErrWhenDone( SlurmJobFuture future ) throws IOException
     {
-        for ( int i = 0; i < 100; ++i )
+        for ( ; ; )
         {
-            System.out.print( "Status of job " + future.jobID + " is " + future.status() + "\n" );
+            String status = logJobStatus( future );
 
-            if ( future.status().equals( COMPLETED ) )
+            if ( status.equals( COMPLETED ) )
             {
-                Logger.log( "Job " + future.jobID + " is done." );
-
-                Logger.log( future.getError() );
-
-                Logger.log( future.getOutput() );
-
+                logJobError( future );
+                logJobOutput( future );
                 break;
             }
         }
+    }
+
+    private static void logJobOutput( SlurmJobFuture future ) throws IOException
+    {
+        Logger.log( "Job output:" );
+        Logger.log( future.getOutput() );
+    }
+
+    private static void logJobError( SlurmJobFuture future ) throws IOException
+    {
+        Logger.log( "Job error:" );
+        Logger.log( future.getError() );
+    }
+
+    private static String logJobStatus( SlurmJobFuture future )
+    {
+        String status = future.status();
+        Logger.log( "Status of job " + future.jobID + " is " + status + "\n" );
+        return status;
     }
 }

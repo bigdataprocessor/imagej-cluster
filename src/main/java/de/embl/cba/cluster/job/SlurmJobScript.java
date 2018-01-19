@@ -49,11 +49,12 @@ public class SlurmJobScript
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + queue );
         lines.add( " " );
+        lines.add( "# Node = %N" );
+        lines.add( "# Job = %j" );
         lines.add( "ulimit -c 0" );
         lines.add( " " );
         lines.add( "echo \"job started\" \n" );
         lines.add( " " );
-
         for ( String r : executableCommands ) lines.add ( r );
 
         lines.add( " " );

@@ -39,9 +39,9 @@ public class SlurmJobFuture implements Future
 
     public String getError() throws IOException
     {
-        return executorService.readJobOutput( jobID );
+        return executorService.readJobError( jobID );
     }
-    
+
     public String getOutput() throws IOException
     {
         return executorService.readJobOutput( jobID );
