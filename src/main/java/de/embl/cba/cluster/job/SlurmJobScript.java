@@ -42,8 +42,8 @@ public class SlurmJobScript
         ArrayList < String > lines = new ArrayList< >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + slurmExecutorService.getCurrentJobErrorPath() );
-        lines.add( "#SBATCH -o " + slurmExecutorService.getCurrentJobOutputPath() );
+        lines.add( "#SBATCH -e " + slurmExecutorService.getCurrentJobErrPath() );
+        lines.add( "#SBATCH -o " + slurmExecutorService.getCurrentJobOutPath() );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );

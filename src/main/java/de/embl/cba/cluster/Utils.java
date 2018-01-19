@@ -13,9 +13,9 @@ public abstract class Utils
         return timeStamp;
     }
 
-    public static void saveTextAsFile( String text, String remoteFileName, String remoteDirectory )
+
+    public static void saveTextAsFile( String text, String path  )
     {
-        String path = remoteDirectory + File.separator + remoteFileName;
         PrintWriter writer = null;
         try
         {
@@ -31,6 +31,13 @@ public abstract class Utils
         }
         writer.write( text);
         writer.close();
+    }
+
+
+    public static void saveTextAsFile( String text, String filename, String directory )
+    {
+        String path = directory + File.separator + filename;
+        saveTextAsFile( text, path );
     }
 
     public static String readTextFile( String directory, String fileName ) throws IOException

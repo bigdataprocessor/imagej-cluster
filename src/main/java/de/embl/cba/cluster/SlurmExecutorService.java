@@ -3,10 +3,12 @@ package de.embl.cba.cluster;
 import de.embl.cba.cluster.job.SlurmJob;
 import de.embl.cba.cluster.ssh.SSHConnector;
 import de.embl.cba.cluster.ssh.SSHConnectorSettings;
-import net.imglib2.Localizable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -28,16 +30,13 @@ public class SlurmExecutorService implements ExecutorService
 
     private String remoteJobDirectory;
     private String remoteJobPath;
-    private String currentJobFileName;
-
-    private Map< Long, String > jobErrorPath;
-    private Map< Long, String > jobOutputPath;
+    private long currentJobID;
+    private String currentJobTemporaryFileName;
+    private SlurmJob slurmJob;
 
     public SlurmExecutorService( SSHConnectorSettings loginSettings )
     {
         sshConnector = new SSHConnector( loginSettings );
-        jobErrorPath = new HashMap<>(  );
-        jobOutputPath = new HashMap<>(  );
     }
 
     public void shutdown()
@@ -82,35 +81,31 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public SlurmJobFuture submit( SlurmJob slurmJob ) throws IOException
+    public synchronized SlurmJobFuture submit( SlurmJob slurmJob ) throws IOException
     {
 
-        prepareJobSubmission( slurmJob );
+        this.slurmJob = slurmJob;
 
-        Long jobID = runJobOnRemoteServer();
+        prepareJobSubmission();
 
-        registerJob( jobID );
+        runJobOnRemoteServer();
 
-        return createJobFuture( slurmJob, jobID );
+        changeJobFilenameToJobID();
+
+        return createJobFuture();
     }
 
-    private void registerJob( long jobID )
+    private void changeJobFilenameToJobID( ) throws IOException
     {
-        jobErrorPath.put( jobID, getCurrentJobErrorPath() );
-        jobOutputPath.put( jobID, getCurrentJobOutputPath() );
+        String finalJobPath = remoteJobDirectory + File.separator + currentJobID + ".job";
+        Path source = Paths.get( Utils.localMounting( remoteJobPath ) );
+        Files.move( source,  source.resolveSibling( finalJobPath ) );
     }
 
-    private SlurmJobFuture createJobFuture( SlurmJob slurmJob, Long jobID )
+    private SlurmJobFuture createJobFuture( )
     {
-        if ( jobID != null )
-        {
-            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, slurmJob, jobID );
-            return slurmJobFuture;
-        }
-        else
-        {
-            return null;
-        }
+        SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, slurmJob, currentJobID );
+        return slurmJobFuture;
     }
 
     public < T > List< Future< T > > invokeAll( Collection< ? extends Callable< T > > tasks ) throws InterruptedException
@@ -146,12 +141,12 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private void prepareJobSubmission( SlurmJob job ) throws IOException
+    private void prepareJobSubmission( ) throws IOException
     {
         Logger.log( "Preparing job submission..." );
         setupRemoteJobDirectory();
-        setupRemoteJobFilename();
-        createJobFileOnRemoteServer( job.getJobText( this ) );
+        setupTemporaryJobFilename();
+        createJobFileOnRemoteServer( slurmJob.getJobText( this ) );
         Logger.done();
     }
 
@@ -174,15 +169,15 @@ public class SlurmExecutorService implements ExecutorService
 
     public String readJobOutput( long jobID ) throws IOException
     {
-        return Utils.readTextFile( Utils.localMounting( jobOutputPath.get( jobID ) ));
+        return Utils.readTextFile( Utils.localMounting( getJobOutPath( jobID ) ));
     }
 
     public String readJobError( long jobID ) throws IOException
     {
-        return Utils.readTextFile( Utils.localMounting( jobErrorPath.get( jobID ) ) );
+        return Utils.readTextFile( Utils.localMounting( getJobErrPath( jobID ) ) );
     }
 
-    private Long runJobOnRemoteServer()
+    private void runJobOnRemoteServer()
     {
         Logger.log( "Submitting job..." );
         try
@@ -192,18 +187,20 @@ public class SlurmExecutorService implements ExecutorService
             if ( response.get( 0 ).contains( SUCCESSFUL_JOB_SUBMISSION_RESPONSE ) )
             {
                 String tmp = response.get( 0 ).replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" );
-                long jobID = Integer.parseInt( tmp.trim() );
+                currentJobID = Integer.parseInt( tmp.trim() );
                 Logger.log( "...done." );
-                return jobID;
+            }
+            else
+            {
+                // TODO
             }
 
         }
         catch ( Exception e )
         {
-            //
+            // TODO
+            e.printStackTrace();
         }
-
-        return null;
     }
 
     public String checkJobStatus( long jobID )
@@ -226,17 +223,21 @@ public class SlurmExecutorService implements ExecutorService
     private void createJobFileOnRemoteServer( String jobText )
     {
 
-        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
+        remoteJobPath = remoteJobDirectory + File.separator + currentJobTemporaryFileName;
 
-        Utils.saveTextAsFile( jobText, currentJobFileName, Utils.localMounting( remoteJobDirectory ) );
+        Utils.saveTextAsFile( jobText, Utils.localMounting( remoteJobPath ) );
 
-        remoteJobPath = remoteJobDirectory + File.separator + currentJobFileName;
+        //TODO: sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
     }
 
-    private void setupRemoteJobFilename()
+    private void setupTemporaryJobFilename()
     {
-        currentJobFileName = Utils.timeStamp() + "-job.sh";
+        Random random = new Random();
+        String number = "" + random.nextLong();
+        String date = new Date().toString();
+
+        currentJobTemporaryFileName = date + "--" + number + ".job";
     }
 
     public String getRemoteJobDirectory()
@@ -244,20 +245,27 @@ public class SlurmExecutorService implements ExecutorService
         return remoteJobDirectory;
     }
 
+    public static final String OUTPUT = ".out";
+    public static final String ERROR = ".err";
 
-    public String getCurrentJobOutputPath()
+    public String getCurrentJobOutPath()
     {
-        return remoteJobDirectory + "/" + currentJobFileName + ".out" ;
+        return remoteJobDirectory + "/" + currentJobID + OUTPUT;
     }
 
-    public String getCurrentJobErrorPath()
+    public String getCurrentJobErrPath()
     {
-        return remoteJobDirectory + "/" + currentJobFileName + ".err" ;
+        return remoteJobDirectory + "/" + currentJobID + ERROR;
     }
 
-    public String getCurrentJobFileName()
+    public String getJobOutPath( long jobID  )
     {
-        return currentJobFileName;
+        return remoteJobDirectory + "/" + jobID + OUTPUT ;
+    }
+
+    public String getJobErrPath( long jobID  )
+    {
+        return remoteJobDirectory + "/" + jobID + OUTPUT ;
     }
 
 
