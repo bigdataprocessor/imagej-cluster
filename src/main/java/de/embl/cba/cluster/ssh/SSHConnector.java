@@ -1,4 +1,4 @@
-package de.embl.cba.cluster;
+package de.embl.cba.cluster.ssh;
 
 import com.jcraft.jsch.*;
 
@@ -25,14 +25,14 @@ public class SSHConnector
 
     public String userName()
     {
-        return loginSettings.user;
+        return loginSettings.getUser();
     }
 
     private void connectSession() throws JSchException
     {
         JSch jsch = new JSch();
-        session = jsch.getSession( loginSettings.user, loginSettings.host, loginSettings.port );
-        session.setPassword( loginSettings.password );
+        session = jsch.getSession( loginSettings.getUser(), loginSettings.getHost(), loginSettings.port );
+        session.setPassword( loginSettings.getPassword() );
         session.setConfig( "StrictHostKeyChecking", "no" );
         System.out.println( "Establishing Connection..." );
         session.connect();
@@ -47,6 +47,7 @@ public class SSHConnector
     public ArrayList<String> executeCommand( String command ) throws Exception
     {
         connectSession();
+
         execute( command );
         recordSystemResponseText();
         disconnect();

@@ -4,7 +4,7 @@
 
 /* 
 
-On a mac call me like this from command line:
+On a mac call me like this from commandAndParameters line:
 
 /Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --ij2 --headless --run /Users/tischer/Documents/fiji-slurm/src/test/resources/ij2plugin-rotate-image.groovy "IMAGE_FILE='/Users/tischer/Documents/fiji-slurm/src/test/resources/horizontal-line.tif',ANGLE_IN_DEGREES=50,OUTPUT_DIRECTORY='/Users/tischer/Documents/fiji-slurm/src/test/resources'"
 

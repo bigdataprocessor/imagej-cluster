@@ -37,6 +37,12 @@ public abstract class Utils
     {
         String path = directory + File.separator + fileName;
 
+        return readTextFile( path );
+    }
+
+    public static String readTextFile( String path ) throws IOException
+    {
+
         BufferedReader br = new BufferedReader(new FileReader( path ) );
         try {
             StringBuilder sb = new StringBuilder();
@@ -51,6 +57,7 @@ public abstract class Utils
         } finally {
             br.close();
         }
+
     }
 
 

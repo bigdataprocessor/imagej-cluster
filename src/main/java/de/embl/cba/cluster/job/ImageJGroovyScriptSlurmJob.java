@@ -1,4 +1,6 @@
-package de.embl.cba.cluster;
+package de.embl.cba.cluster.job;
+
+import de.embl.cba.cluster.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ImageJGroovyScriptJob
+public class ImageJGroovyScriptSlurmJob
 {
     public LinkedHashMap< String, Dependency > dependencies;
     public static final String JAVA = "Java";
@@ -29,7 +31,7 @@ public class ImageJGroovyScriptJob
 
     private String jobRemoteFilename = "job";
 
-    public ImageJGroovyScriptJob(  )
+    public ImageJGroovyScriptSlurmJob(  )
     {
         configureJobScript();
         addDependencies();
@@ -51,10 +53,11 @@ public class ImageJGroovyScriptJob
         addJavaDependency();
         addX11Dependency();
         addXVFBDependency();
-        addGroovyScriptDependency();
         addImageJDependency();
         addInputImageDependency();
         addOutputDirectoryDependency();
+
+        addGroovyScriptDependency();
 
     }
 
@@ -65,7 +68,6 @@ public class ImageJGroovyScriptJob
         manageInputImageDependency( executorService.getRemoteJobDirectory() );
         manageOutputDirectoryDependency( executorService.getRemoteJobDirectory() );
     }
-
 
     public void addGroovyScriptParameter( String key, String value )
     {
@@ -165,7 +167,6 @@ public class ImageJGroovyScriptJob
 
     }
 
-
     private void manageGroovyScriptDependency( String remoteJobDirectory )
     {
         Utils.saveTextAsFile( getLocalDependencyGroovyScriptText(), groovyScriptName, Utils.localMounting( remoteJobDirectory ) );
@@ -195,15 +196,11 @@ public class ImageJGroovyScriptJob
         dependencies.get( OUTPUT_DIRECTORY ).remoteObject = remoteJobDirectory;
     }
 
-    public String jobText()
+    public String getJobText( SlurmExecutorService slurmExecutorService )
     {
-        slurmJobScript.executableCommands = jobScriptCommands();
+        slurmJobScript.setExecutableCommands( jobScriptCommands() );
 
-        slurmJobScript.jobDirectory = (String) dependencies.get( REMOTE_JOB_DIRECTORY_DEPENDENCY ).remoteObject;
-
-        slurmJobScript.jobRemoteFilename = jobRemoteFilename;
-
-        return slurmJobScript.jobText();
+        return slurmJobScript.jobText( slurmExecutorService );
     }
 
     public void setLocalGroovyScript( File file ) throws IOException

@@ -22,7 +22,7 @@
     </build>
 
     <name>Fiji Slurm</name>
-	<description>Running Fiji on Slurm cluster<description>
+	<description>Running Fiji on Slurm cluster</description>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>EMBL</name>
@@ -131,6 +131,15 @@
 			<artifactId>imglib2</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>org.scijava</groupId>
+            <artifactId>scijava-plugins-commands</artifactId>
+        </dependency>
 
 	</dependencies>
 

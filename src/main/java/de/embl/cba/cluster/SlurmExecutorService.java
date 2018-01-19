@@ -1,10 +1,12 @@
 package de.embl.cba.cluster;
 
+import de.embl.cba.cluster.job.SlurmJob;
+import de.embl.cba.cluster.ssh.SSHConnector;
+import de.embl.cba.cluster.ssh.SSHConnectorSettings;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 // TODO: set remote tmp dir via some default mechanism
@@ -23,14 +25,18 @@ public class SlurmExecutorService implements ExecutorService
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
     private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
 
-
     private String remoteJobDirectory;
     private String remoteJobPath;
     private String currentJobFileName;
 
+    private Map< Long, String > jobErrorPath;
+    private Map< Long, String > jobOutputPath;
+
     public SlurmExecutorService( SSHConnectorSettings loginSettings )
     {
         sshConnector = new SSHConnector( loginSettings );
+        jobErrorPath = new HashMap<>(  );
+        jobOutputPath = new HashMap<>(  );
     }
 
     public void shutdown()
@@ -75,22 +81,30 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public SlurmJobFuture submit( ImageJGroovyScriptJob imageJGroovyScriptJob ) throws IOException
+    public SlurmJobFuture submit( SlurmJob slurmJob ) throws IOException
     {
 
-        prepareJobSubmission( imageJGroovyScriptJob );
+        prepareJobSubmission( slurmJob );
 
         Long jobID = runJobOnRemoteServer();
 
-        return createJobFuture( imageJGroovyScriptJob, jobID );
+        registerJob( jobID );
 
+        return createJobFuture( slurmJob, jobID );
     }
 
-    private SlurmJobFuture createJobFuture( ImageJGroovyScriptJob imageJGroovyScriptJob, Long jobID )
+
+    private void registerJob( long jobID )
+    {
+        jobErrorPath.put( jobID, getCurrentJobErrorPath() );
+        jobOutputPath.put( jobID, getCurrentJobOutputPath() );
+    }
+
+    private SlurmJobFuture createJobFuture( SlurmJob slurmJob, Long jobID )
     {
         if ( jobID != null )
         {
-            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, imageJGroovyScriptJob, jobID );
+            SlurmJobFuture slurmJobFuture = new SlurmJobFuture( this, slurmJob, jobID );
             return slurmJobFuture;
         }
         else
@@ -132,18 +146,12 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private void prepareJobSubmission( ImageJGroovyScriptJob job ) throws IOException
+    private void prepareJobSubmission( SlurmJob job ) throws IOException
     {
         setupRemoteJobDirectory();
         setupRemoteJobFilename();
-
-        job.manageDependencies( this );
-        job.setJobFilename( currentJobFileName );
-
-        createJobFileOnRemoteServer( job.jobText() );
-
+        createJobFileOnRemoteServer( job.getJobText( this ) );
     }
-
 
     private void setupRemoteJobDirectory()
     {
@@ -159,6 +167,17 @@ public class SlurmExecutorService implements ExecutorService
         }
 
     }
+
+    public String readJobOutput( long jobID ) throws IOException
+    {
+        return Utils.readTextFile( jobOutputPath.get( jobID ) );
+    }
+
+    public String getJobError( long jobID ) throws IOException
+    {
+        return Utils.readTextFile( jobErrorPath.get( jobID ) );
+    }
+
 
     private Long runJobOnRemoteServer()
     {
@@ -182,7 +201,7 @@ public class SlurmExecutorService implements ExecutorService
         return null;
     }
 
-    public String jobStatus( long jobID )
+    public String checkJobStatus( long jobID )
     {
         String cmd = JOB_STATUS_COMMAND + jobID + " --format=State";
 
@@ -202,7 +221,7 @@ public class SlurmExecutorService implements ExecutorService
     private void createJobFileOnRemoteServer( String jobText )
     {
 
-        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.jobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
+        //sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
 
         Utils.saveTextAsFile( jobText, currentJobFileName, Utils.localMounting( remoteJobDirectory ) );
 
@@ -218,6 +237,24 @@ public class SlurmExecutorService implements ExecutorService
     public String getRemoteJobDirectory()
     {
         return remoteJobDirectory;
+    }
+
+    public static final String NODE_ID_PATTERN = "--node_%N--id_%j";
+
+    public String getCurrentJobOutputPath()
+    {
+        return remoteJobDirectory + "/" + currentJobFileName + NODE_ID_PATTERN + ".out" ;
+    }
+
+    public String getCurrentJobErrorPath()
+    {
+        return remoteJobDirectory + "/" + currentJobFileName + NODE_ID_PATTERN + ".err" ;
+    }
+
+
+    public String getCurrentJobFileName()
+    {
+        return currentJobFileName;
     }
 
 
