@@ -30,7 +30,7 @@ public class SSHConnector
 
     private void connectSession() throws JSchException
     {
-        Logger.log( "Establishing SSH connection to " + loginSettings.getHost() + "...");
+        //Logger.log( "Establishing SSH connection to " + loginSettings.getHost() + "...");
 
         JSch jsch = new JSch();
         session = jsch.getSession( loginSettings.getUser(), loginSettings.getHost(), loginSettings.port );
@@ -38,7 +38,7 @@ public class SSHConnector
         session.setConfig( "StrictHostKeyChecking", "no" );
         session.connect();
 
-        Logger.done();
+        //Logger.done();
     }
 
     public ArrayList<String> executeCommand( String command ) throws Exception
