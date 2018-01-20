@@ -1,8 +1,10 @@
 package de.embl.cba.cluster.ssh;
 
 import com.jcraft.jsch.*;
+import de.embl.cba.cluster.Logger;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 
@@ -15,12 +17,10 @@ public class SSHConnector
     private ChannelExec channelExec;
     private Session session;
     private ArrayList< String > systemResponses;
-    private String localTmpDirectory;
 
     public SSHConnector( SSHConnectorSettings loginSettings )
     {
         this.loginSettings = loginSettings;
-        localTmpDirectory = System.getProperty("java.io.tmpdir");
     }
 
     public String userName()
@@ -30,18 +30,15 @@ public class SSHConnector
 
     private void connectSession() throws JSchException
     {
+        Logger.log( "Establishing SSH connection to " + loginSettings.getHost() + "...");
+
         JSch jsch = new JSch();
         session = jsch.getSession( loginSettings.getUser(), loginSettings.getHost(), loginSettings.port );
         session.setPassword( loginSettings.getPassword() );
         session.setConfig( "StrictHostKeyChecking", "no" );
-        System.out.println( "Establishing Connection..." );
         session.connect();
-        System.out.println( "Connection established." );
-    }
 
-    public void setLocalTmpDirectory( String localTmpDirectory )
-    {
-        this.localTmpDirectory = localTmpDirectory;
+        Logger.done();
     }
 
     public ArrayList<String> executeCommand( String command ) throws Exception
@@ -50,6 +47,7 @@ public class SSHConnector
 
         execute( command );
         recordSystemResponseText();
+
         disconnect();
 
         return systemResponses;
@@ -68,8 +66,8 @@ public class SSHConnector
 
         channelExec.connect();
 
-        String output = convertStreamToStr( out );
-        String error = convertStreamToStr( err );
+        String output = asString( out );
+        String error = asString( err );
 
         systemResponses = new ArrayList< String >(  );
         addToSystemResponses( output );
@@ -91,58 +89,27 @@ public class SSHConnector
         channelExec.setCommand( command );
     }
 
-
     public void saveTextAsFileOnRemoteServerUsingSFTP( String text,
                                                        String remoteFileName,
-                                                       String remoteDirecory ) throws Exception
+                                                       String remoteDirectory ) throws Exception
     {
-
-
-        generateLocalTmpFile( text, remoteFileName );
-
         connectSession();
 
         ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
         channelSftp.connect();
 
-        channelSftp.lcd( localTmpDirectory );
-        channelSftp.cd( remoteDirecory );
-        channelSftp.put( remoteFileName, remoteFileName );
-
+        channelSftp.cd( remoteDirectory );
+        channelSftp.put( asInputStream( text ), remoteFileName );
 
         channelSftp.disconnect();
     }
 
-
-    private void generateLocalTmpFile( String text, String remoteFileName ) throws FileNotFoundException, UnsupportedEncodingException
+    private InputStream asInputStream( String text ) throws UnsupportedEncodingException
     {
-        String localTmpPath = localTmpDirectory + File.pathSeparator + remoteFileName;
-        PrintWriter writer = new PrintWriter( localTmpPath, "UTF-8" );
-        writer.write( text);
-        writer.close();
+        return new ByteArrayInputStream( text.getBytes( StandardCharsets.UTF_8.name() ) );
     }
 
-    public void copyFile()
-    {
-        /*
-        System.out.println("Crating SFTP Channel.");
-        ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
-        channelSftp.connect();
-        System.out.println("SFTP Channel created.");
-        InputStream out = null;
-        out = channelSftp.get(remoteFile);
-        BufferedReader br = new BufferedReader(new InputStreamReader(out));
-        String line;
-        while ((line = br.readLine()) != null)
-            System.out.println(line);
-        br.close();
-        channelSftp.disconnect();
-        */
-
-    }
-
-
-    private static String convertStreamToStr(InputStream is) throws IOException
+    private static String asString( InputStream is ) throws IOException
     {
 
         if (is != null) {

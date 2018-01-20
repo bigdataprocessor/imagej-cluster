@@ -141,12 +141,21 @@ public class SlurmExecutorService implements ExecutorService
         return true;
     }
 
-    private void prepareJobSubmission( ) throws IOException
+    private void prepareJobSubmission( )
     {
         Logger.log( "Preparing job submission..." );
         setupRemoteJobDirectory();
         setupTemporaryJobFilename();
-        createJobFileOnRemoteServer( slurmJob.getJobText( this ) );
+
+        try
+        {
+            createJobFileOnRemoteServer( slurmJob.getJobText( this ) );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace(); // TODO
+        }
+
         Logger.done();
     }
 
@@ -220,24 +229,20 @@ public class SlurmExecutorService implements ExecutorService
 
     }
 
-    private void createJobFileOnRemoteServer( String jobText )
+    private void createJobFileOnRemoteServer( String jobText ) throws Exception
     {
 
-        remoteJobPath = remoteJobDirectory + File.separator + currentJobTemporaryFileName;
+        //remoteJobPath = remoteJobDirectory + File.separator + currentJobTemporaryFileName;
+        //Utils.saveTextAsFile( jobText, Utils.localMounting( remoteJobPath ) );
 
-        Utils.saveTextAsFile( jobText, Utils.localMounting( remoteJobPath ) );
-
-        //TODO: sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( slurmJobFuture.getJobText(), jobFileName, remoteJobDirectoryAsMountedRemotely );
+        sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, currentJobTemporaryFileName, remoteJobDirectory );
 
     }
 
     private void setupTemporaryJobFilename()
     {
         Random random = new Random();
-        String number = "" + random.nextLong();
-        String date = new Date().toString();
-
-        currentJobTemporaryFileName = date + "--" + number + ".job";
+        currentJobTemporaryFileName = random.nextLong() + ".job";
     }
 
     public String getRemoteJobDirectory()
