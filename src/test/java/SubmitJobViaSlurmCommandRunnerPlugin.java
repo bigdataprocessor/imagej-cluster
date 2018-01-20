@@ -31,7 +31,7 @@ public class SubmitJobViaSlurmCommandRunnerPlugin
     {
         Map< String, Object > parameters = new HashMap<>(  );
         parameters.put( "username", "tischer" );
-        parameters.put( "password", "OlexOlex" );
+        parameters.put( "password", "pwd" );
         parameters.put( "commandAndParameters", command );
         return parameters;
     }
