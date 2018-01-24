@@ -95,11 +95,18 @@ public class SlurmExecutorService implements ExecutorService
         return createJobFuture();
     }
 
-    private void changeJobFilenameToJobID( ) throws IOException
+    private void changeJobFilenameToJobID( )
     {
         String finalJobPath = remoteJobDirectory + File.separator + currentJobID + ".job";
-        Path source = Paths.get( Utils.localMounting( remoteJobPath ) );
-        Files.move( source,  source.resolveSibling( finalJobPath ) );
+        Path source = Paths.get( Utils.localMounting( remoteJobDirectory + File.separator + currentJobTemporaryFileName  ) );
+        try
+        {
+            Files.move( source,  source.resolveSibling( Utils.localMounting( finalJobPath ) ) );
+        }
+        catch ( IOException e )
+        {
+            Logger.error( e.toString() );
+        }
     }
 
     private SlurmJobFuture createJobFuture( )
@@ -189,9 +196,10 @@ public class SlurmExecutorService implements ExecutorService
     private void runJobOnRemoteServer()
     {
         Logger.log( "Submitting job..." );
+
         try
         {
-            ArrayList< String > response = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobPath );
+            ArrayList< String > response = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobDirectory + "/" + currentJobTemporaryFileName );
 
             if ( response.get( 0 ).contains( SUCCESSFUL_JOB_SUBMISSION_RESPONSE ) )
             {
@@ -235,14 +243,15 @@ public class SlurmExecutorService implements ExecutorService
         //remoteJobPath = remoteJobDirectory + File.separator + currentJobTemporaryFileName;
         //Utils.saveTextAsFile( jobText, Utils.localMounting( remoteJobPath ) );
 
-        sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, currentJobTemporaryFileName, remoteJobDirectory );
+        sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, remoteJobDirectory, currentJobTemporaryFileName );
+
 
     }
 
     private void setupTemporaryJobFilename()
     {
         Random random = new Random();
-        currentJobTemporaryFileName = random.nextLong() + ".job";
+        currentJobTemporaryFileName = ( random.nextLong() & Long.MAX_VALUE ) + ".job";
     }
 
     public String getRemoteJobDirectory()

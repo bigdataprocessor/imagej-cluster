@@ -90,8 +90,8 @@ public class SSHConnector
     }
 
     public void saveTextAsFileOnRemoteServerUsingSFTP( String text,
-                                                       String remoteFileName,
-                                                       String remoteDirectory ) throws Exception
+                                                       String remoteDirectory,
+                                                       String remoteFileName ) throws Exception
     {
         connectSession();
 

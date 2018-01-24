@@ -13,15 +13,7 @@ public class LogTextPlugin implements Command
 
     public void run()
     {
-        printCommandToLogWindow();
-
         IJ.log( "You entered: " + text );
-    }
-
-    private void printCommandToLogWindow()
-    {
-        String plugin = getClass().getEnclosingClass().getName();
-        IJ.log( "[Command] " + plugin + " " + "\"text=\""+text+"\"");
     }
 
 }

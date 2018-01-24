@@ -53,7 +53,7 @@ public class SubmitJobViaSlurmCommandRunnerPlugin implements Command
     {
         String imagej = ALMF_CLUSTER_IMAGEJ_CMD;
 
-        String ij2commmand = "LogTextPlugin";
+        String ij2commmand = "Log Text"; // name as appears in Fiji menu, NOT class name!
 
         String parameters = "text=\"Hello World!\"";
 

@@ -10,6 +10,10 @@ public class Logger
         IJ.log( text );
     }
 
+    public static void error( String text )
+    {
+        IJ.showMessage( text );
+    }
 
     public static void done( )
     {
