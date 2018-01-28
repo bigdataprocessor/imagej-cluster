@@ -8,6 +8,8 @@
 	<groupId>embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.0.1</version>
+
+    <!--
     <build>
         <plugins>
             <plugin>
@@ -20,6 +22,7 @@
             </plugin>
         </plugins>
     </build>
+    -->
 
     <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster</description>
@@ -142,6 +145,25 @@
         </dependency>
 
 	</dependencies>
+
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${main-class}</mainClass>
+						</manifest>
+					</archive>
+					<finalName>fiji-slurm</finalName>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
 
 
 </project>
