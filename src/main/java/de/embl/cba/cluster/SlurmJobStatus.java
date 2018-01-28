@@ -23,13 +23,11 @@ public abstract class SlurmJobStatus
 
     private static void logJobOutput( SlurmJobFuture future ) throws IOException
     {
-        Logger.log( "Job output:" );
         Logger.log( future.getOutput() );
     }
 
     private static void logJobError( SlurmJobFuture future ) throws IOException
     {
-        Logger.log( "Job error:" );
         Logger.log( future.getError() );
     }
 

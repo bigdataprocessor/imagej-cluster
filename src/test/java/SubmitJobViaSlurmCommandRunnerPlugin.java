@@ -51,14 +51,9 @@ public class SubmitJobViaSlurmCommandRunnerPlugin implements Command
 
     private static String createExecutableCommand()
     {
-        String imagej = ALMF_CLUSTER_IMAGEJ_HEADLESS;
-
-        String ij2commmand = "Log Text"; // name as appears in Fiji menu, NOT class name!
-
-        String parameters = "text=\"Hello World!\"";
-
-        String cmd = imagej + " " + ij2commmand + " " + parameters;
-
+        String ij2commmand = "\"Log Text\""; // name as appears in Fiji menu, NOT class name!
+        String parameters = "\"text='Hello World!'\"";
+        String cmd = ALMF_CLUSTER_IMAGEJ_HEADLESS + " " + ij2commmand + " " + parameters;
         return cmd;
     }
 

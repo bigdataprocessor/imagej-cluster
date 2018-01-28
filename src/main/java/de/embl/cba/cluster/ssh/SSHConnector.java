@@ -57,6 +57,7 @@ public class SSHConnector
 
     public ArrayList<String> executeCommand( String command )
     {
+        Logger.log( "# Executing remote command: " + command );
         connectSession();
 
         execute( command );
@@ -127,7 +128,11 @@ public class SSHConnector
                                                        String remoteDirectory,
                                                        String remoteFileName ) throws Exception
     {
-        Logger.log( "Creating remote file: " + remoteDirectory + "/" + remoteFileName );
+        Logger.log( "# Saving text as remote file:");
+        Logger.log( "Remote file path: " + remoteDirectory + "/" + remoteFileName );
+        Logger.log( "Text: " );
+        Logger.log( text );
+
         ChannelSftp channelSftp = createSftpChannel();
 
         channelSftp.cd( remoteDirectory );
@@ -140,7 +145,7 @@ public class SSHConnector
     {
         try
         {
-            Logger.log( "Renaming remote file:" );
+            Logger.log( "# Renaming remote file:" );
             Logger.log( "Original path: " + oldPath );
             Logger.log( "New path: " + newPath );
 
@@ -174,7 +179,7 @@ public class SSHConnector
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
     {
-        Logger.log( "Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
+        Logger.log( "# Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
 
         try
         {

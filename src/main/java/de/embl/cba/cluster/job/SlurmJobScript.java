@@ -48,17 +48,11 @@ public class SlurmJobScript
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + queue );
-        lines.add( " " );
-        lines.add( "# Node = %N" );
-        lines.add( "# Job = %j" );
         lines.add( "ulimit -c 0" );
-        lines.add( " " );
-        lines.add( "echo \"job started\" \n" );
-        lines.add( " " );
+        lines.add( "echo \"job started\"" );
+        lines.add( "hostname" );;
         for ( String r : executableCommands ) lines.add ( r );
-
-        lines.add( " " );
-        lines.add( "echo \"job finished\" \n" );
+        lines.add( "echo \"job finished\"" );
 
         return String.join( "\n", lines );
 

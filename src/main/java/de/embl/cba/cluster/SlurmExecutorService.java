@@ -3,6 +3,7 @@ package de.embl.cba.cluster;
 import de.embl.cba.cluster.job.SlurmJob;
 import de.embl.cba.cluster.ssh.SSHConnector;
 import de.embl.cba.cluster.ssh.SSHConnectorSettings;
+import ij.IJ;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,8 +93,6 @@ public class SlurmExecutorService implements ExecutorService
 
         renameJobFileWithJobID();
 
-        Logger.log( sshConnector.ls( remoteJobDirectory ) );
-
         return createJobFuture();
     }
 
@@ -182,20 +181,16 @@ public class SlurmExecutorService implements ExecutorService
 
     public String readJobOutput( long jobID ) throws IOException
     {
-        // return Utils.readTextFile( Utils.localMounting( getJobOutPath( jobID ) ));
         return sshConnector.readRemoteTextFileUsingSFTP( getJobDirectory( jobID ), getJobOutFilename( jobID )  );
     }
 
     public String readJobError( long jobID ) throws IOException
     {
-        //  return Utils.readTextFile( Utils.localMounting( getJobErrPath( jobID ) ) );
         return sshConnector.readRemoteTextFileUsingSFTP( getJobDirectory( jobID ), getJobErrFilename( jobID )  );
     }
 
     private void runJobOnRemoteServer()
     {
-        Logger.log( "Submitting job..." );
-
         try
         {
             ArrayList< String > response = sshConnector.executeCommand( SUBMIT_JOB_COMMAND + remoteJobDirectory + "/" + currentJobTemporaryFileName );
@@ -204,11 +199,10 @@ public class SlurmExecutorService implements ExecutorService
             {
                 String tmp = response.get( 0 ).replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" );
                 currentJobID = Integer.parseInt( tmp.trim() );
-                Logger.log( "Submitted job: " + currentJobID );
             }
             else
             {
-                // TODO
+                Logger.error( "Job submission failed!" );
             }
 
         }
@@ -259,12 +253,12 @@ public class SlurmExecutorService implements ExecutorService
 
     public String getCurrentJobOutPath()
     {
-        return remoteJobDirectory + "/" + currentJobID + OUTPUT;
+        return remoteJobDirectory + "/" + "%j" + OUTPUT;
     }
 
     public String getCurrentJobErrPath()
     {
-        return remoteJobDirectory + "/" + currentJobID + ERROR;
+        return remoteJobDirectory + "/" + "%j" + ERROR;
     }
 
     public String getJobOutPath( long jobID  )
@@ -279,7 +273,7 @@ public class SlurmExecutorService implements ExecutorService
 
     public String getJobErrFilename( long jobID  )
     {
-        return jobID + OUTPUT ;
+        return jobID + ERROR ;
     }
 
     public String getJobErrPath( long jobID  )
