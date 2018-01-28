@@ -1,5 +1,7 @@
 package de.embl.cba.cluster;
 
+import de.embl.cba.cluster.logger.Logger;
+
 import java.io.IOException;
 
 public abstract class SlurmJobStatus

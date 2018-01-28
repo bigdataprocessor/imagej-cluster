@@ -1,9 +1,9 @@
 package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.SlurmJob;
+import de.embl.cba.cluster.logger.Logger;
 import de.embl.cba.cluster.ssh.SSHConnector;
 import de.embl.cba.cluster.ssh.SSHConnectorSettings;
-import ij.IJ;
 
 import java.io.File;
 import java.io.IOException;

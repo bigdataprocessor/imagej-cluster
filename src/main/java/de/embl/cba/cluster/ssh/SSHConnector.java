@@ -1,7 +1,7 @@
 package de.embl.cba.cluster.ssh;
 
 import com.jcraft.jsch.*;
-import de.embl.cba.cluster.Logger;
+import de.embl.cba.cluster.logger.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

@@ -1,4 +1,4 @@
-package de.embl.cba.cluster;
+package de.embl.cba.cluster.dependencies;
 
 public enum DependencyType
 {

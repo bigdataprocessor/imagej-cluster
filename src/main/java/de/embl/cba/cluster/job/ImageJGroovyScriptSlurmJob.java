@@ -1,6 +1,8 @@
 package de.embl.cba.cluster.job;
 
 import de.embl.cba.cluster.*;
+import de.embl.cba.cluster.dependencies.Dependency;
+import de.embl.cba.cluster.dependencies.DependencyType;
 
 import java.io.File;
 import java.io.IOException;
