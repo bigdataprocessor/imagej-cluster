@@ -5,11 +5,12 @@
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>embl.cba</groupId>
+	<groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.0.1</version>
+    <packaging>jar</packaging>
 
-    <!--
+
     <build>
         <plugins>
             <plugin>
@@ -20,6 +21,26 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+        </plugins>
+    </build>
+
+
+    <!--
+    <build>
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main-class}</mainClass>
+                        </manifest>
+                    </archive>
+                    <finalName>fiji-slurm</finalName>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
     -->
@@ -147,23 +168,6 @@
 	</dependencies>
 
 
-	<build>
-		<plugins>
-
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${main-class}</mainClass>
-						</manifest>
-					</archive>
-					<finalName>fiji-slurm</finalName>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
 
 
 </project>
