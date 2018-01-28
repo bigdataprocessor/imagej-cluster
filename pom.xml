@@ -11,6 +11,7 @@
     <packaging>jar</packaging>
 
 
+    <!--
     <build>
         <plugins>
             <plugin>
@@ -23,12 +24,10 @@
             </plugin>
         </plugins>
     </build>
+    -->
 
-
-    <!--
     <build>
         <plugins>
-
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
@@ -40,10 +39,9 @@
                     <finalName>fiji-slurm</finalName>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-    -->
+
 
     <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster</description>
