@@ -1,5 +1,4 @@
 import de.embl.cba.cluster.plugins.SlurmCommandRunnerPlugin;
-import ij.IJ;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
@@ -9,7 +8,8 @@ import org.scijava.widget.TextWidget;
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.embl.cba.cluster.job.ImageJCommandSlurmJob.ALMF_CLUSTER_IMAGEJ_CMD;
+import static de.embl.cba.cluster.job.ImageJCommandSlurmJob.ALMF_CLUSTER_IMAGEJ_HEADLESS;
+import static de.embl.cba.cluster.job.ImageJCommandSlurmJob.ALMF_CLUSTER_IMAGEJ_XVFB;
 
 @Plugin(type = Command.class, menuPath = "Plugins>EMBL>Test" )
 public class SubmitJobViaSlurmCommandRunnerPlugin implements Command
@@ -51,7 +51,7 @@ public class SubmitJobViaSlurmCommandRunnerPlugin implements Command
 
     private static String createExecutableCommand()
     {
-        String imagej = ALMF_CLUSTER_IMAGEJ_CMD;
+        String imagej = ALMF_CLUSTER_IMAGEJ_HEADLESS;
 
         String ij2commmand = "Log Text"; // name as appears in Fiji menu, NOT class name!
 

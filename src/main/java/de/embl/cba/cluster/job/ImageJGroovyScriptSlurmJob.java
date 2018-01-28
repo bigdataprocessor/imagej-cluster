@@ -63,10 +63,10 @@ public class ImageJGroovyScriptSlurmJob
 
     public void manageDependencies( SlurmExecutorService executorService ) throws IOException
     {
-        manageJobDirectoryDependency( executorService.getRemoteJobDirectory() );
-        manageGroovyScriptDependency( executorService.getRemoteJobDirectory() );
-        manageInputImageDependency( executorService.getRemoteJobDirectory() );
-        manageOutputDirectoryDependency( executorService.getRemoteJobDirectory() );
+        manageJobDirectoryDependency( executorService.getJobDirectory( 0 ) );
+        manageGroovyScriptDependency( executorService.getJobDirectory(0) );
+        manageInputImageDependency( executorService.getJobDirectory(0) );
+        manageOutputDirectoryDependency( executorService.getJobDirectory(0) );
     }
 
     public void addGroovyScriptParameter( String key, String value )

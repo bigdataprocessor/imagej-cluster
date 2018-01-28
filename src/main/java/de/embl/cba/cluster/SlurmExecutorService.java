@@ -6,9 +6,6 @@ import de.embl.cba.cluster.ssh.SSHConnectorSettings;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -27,6 +24,9 @@ public class SlurmExecutorService implements ExecutorService
 
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
     private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
+
+    public static final String OUTPUT = ".out";
+    public static final String ERROR = ".err";
 
     private String remoteJobDirectory;
     private String remoteJobPath;
@@ -90,23 +90,23 @@ public class SlurmExecutorService implements ExecutorService
 
         runJobOnRemoteServer();
 
-        changeJobFilenameToJobID();
+        renameJobFileWithJobID();
+
+        Logger.log( sshConnector.ls( remoteJobDirectory ) );
 
         return createJobFuture();
     }
 
-    private void changeJobFilenameToJobID( )
+    private void renameJobFileWithJobID( )
     {
+        String tmpJobPath = remoteJobDirectory + File.separator + currentJobTemporaryFileName;
         String finalJobPath = remoteJobDirectory + File.separator + currentJobID + ".job";
-        Path source = Paths.get( Utils.localMounting( remoteJobDirectory + File.separator + currentJobTemporaryFileName  ) );
-        try
-        {
-            Files.move( source,  source.resolveSibling( Utils.localMounting( finalJobPath ) ) );
-        }
-        catch ( IOException e )
-        {
-            Logger.error( e.toString() );
-        }
+
+        // Path source = Paths.get( Utils.localMounting( remoteJobDirectory + File.separator + currentJobTemporaryFileName  ) );
+        //    Files.move( source,  source.resolveSibling( Utils.localMounting( finalJobPath ) ) );
+
+        sshConnector.rename( tmpJobPath, finalJobPath );
+
     }
 
     private SlurmJobFuture createJobFuture( )
@@ -150,7 +150,6 @@ public class SlurmExecutorService implements ExecutorService
 
     private void prepareJobSubmission( )
     {
-        Logger.log( "Preparing job submission..." );
         setupRemoteJobDirectory();
         setupTemporaryJobFilename();
 
@@ -163,34 +162,34 @@ public class SlurmExecutorService implements ExecutorService
             e.printStackTrace(); // TODO
         }
 
-        Logger.done();
     }
 
     private void setupRemoteJobDirectory()
     {
-        Logger.log( "Creating remote job directory via SSH..." );
+
         try
         {
             String directory = "/g/cba/cluster/" + sshConnector.userName();
+            Logger.log( "Creating remote directory: " + directory );
             sshConnector.executeCommand( "mkdir " + directory );
             remoteJobDirectory = directory;
         }
         catch ( Exception e )
         {
-            e.printStackTrace();
+            Logger.error( e.toString() );
         }
-        Logger.done();
-
     }
 
     public String readJobOutput( long jobID ) throws IOException
     {
-        return Utils.readTextFile( Utils.localMounting( getJobOutPath( jobID ) ));
+        // return Utils.readTextFile( Utils.localMounting( getJobOutPath( jobID ) ));
+        return sshConnector.readRemoteTextFileUsingSFTP( getJobDirectory( jobID ), getJobOutFilename( jobID )  );
     }
 
     public String readJobError( long jobID ) throws IOException
     {
-        return Utils.readTextFile( Utils.localMounting( getJobErrPath( jobID ) ) );
+        //  return Utils.readTextFile( Utils.localMounting( getJobErrPath( jobID ) ) );
+        return sshConnector.readRemoteTextFileUsingSFTP( getJobDirectory( jobID ), getJobErrFilename( jobID )  );
     }
 
     private void runJobOnRemoteServer()
@@ -205,7 +204,7 @@ public class SlurmExecutorService implements ExecutorService
             {
                 String tmp = response.get( 0 ).replace( SUCCESSFUL_JOB_SUBMISSION_RESPONSE, "" );
                 currentJobID = Integer.parseInt( tmp.trim() );
-                Logger.log( "...done." );
+                Logger.log( "Submitted job: " + currentJobID );
             }
             else
             {
@@ -245,7 +244,6 @@ public class SlurmExecutorService implements ExecutorService
 
         sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, remoteJobDirectory, currentJobTemporaryFileName );
 
-
     }
 
     private void setupTemporaryJobFilename()
@@ -254,13 +252,10 @@ public class SlurmExecutorService implements ExecutorService
         currentJobTemporaryFileName = ( random.nextLong() & Long.MAX_VALUE ) + ".job";
     }
 
-    public String getRemoteJobDirectory()
+    public String getJobDirectory( long jobID )
     {
         return remoteJobDirectory;
     }
-
-    public static final String OUTPUT = ".out";
-    public static final String ERROR = ".err";
 
     public String getCurrentJobOutPath()
     {
@@ -275,6 +270,16 @@ public class SlurmExecutorService implements ExecutorService
     public String getJobOutPath( long jobID  )
     {
         return remoteJobDirectory + "/" + jobID + OUTPUT ;
+    }
+
+    public String getJobOutFilename( long jobID  )
+    {
+        return jobID + OUTPUT ;
+    }
+
+    public String getJobErrFilename( long jobID  )
+    {
+        return jobID + OUTPUT ;
     }
 
     public String getJobErrPath( long jobID  )
