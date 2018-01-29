@@ -5,11 +5,10 @@
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>de.embl.cba</groupId>
+	<!-- <groupId>de.embl.cba</groupId> -->
+    <groupId>com.github.tischi</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.0.1</version>
-    <packaging>jar</packaging>
-
 
     <!--
     <build>
@@ -26,6 +25,7 @@
     </build>
     -->
 
+    <!--
     <build>
         <plugins>
             <plugin>
@@ -41,7 +41,7 @@
             </plugin>
         </plugins>
     </build>
-
+    -->
 
     <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster</description>
@@ -79,8 +79,8 @@
 		</contributor>
 	</contributors>
 
-	<scm>
-		<connection>scm:git:git://github.com/tischi/fiji-slurm</connection>
+    <scm>
+    <connection>scm:git:git://github.com/tischi/fiji-slurm</connection>
 		<developerConnection>scm:git:git@github.com/tischi/fiji-slurm</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/tischi/fiji-slurm</url>
@@ -108,6 +108,7 @@
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
 		<enforcer.skip>true</enforcer.skip>
 	</properties>
+
 
 	<parent>
 		<groupId>org.scijava</groupId>
