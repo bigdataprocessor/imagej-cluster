@@ -5,26 +5,9 @@
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- <groupId>de.embl.cba</groupId> -->
     <groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.0.2</version>
-
-    <!--
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    -->
-
 
     <build>
         <plugins>
@@ -36,7 +19,7 @@
                             <mainClass>${main-class}</mainClass>
                         </manifest>
                     </archive>
-                    <!--<finalName>fiji-slurm</finalName>-->
+                    <finalName>cluster</finalName>
                 </configuration>
             </plugin>
         </plugins>
