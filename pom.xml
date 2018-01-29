@@ -6,9 +6,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- <groupId>de.embl.cba</groupId> -->
-    <groupId>com.github.tischi</groupId>
+    <groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 
     <!--
     <build>
@@ -25,7 +25,7 @@
     </build>
     -->
 
-    <!--
+
     <build>
         <plugins>
             <plugin>
@@ -36,12 +36,12 @@
                             <mainClass>${main-class}</mainClass>
                         </manifest>
                     </archive>
-                    <finalName>fiji-slurm</finalName>
+                    <!--<finalName>fiji-slurm</finalName>-->
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    -->
+
 
     <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster</description>
@@ -50,6 +50,7 @@
 		<name>EMBL</name>
 		<url>http://embl.de/</url>
 	</organization>
+
 	<licenses>
 		<license>
 			<name>Simplified BSD License</name>
@@ -80,7 +81,7 @@
 	</contributors>
 
     <scm>
-    <connection>scm:git:git://github.com/tischi/fiji-slurm</connection>
+        <connection>scm:git:git://github.com/tischi/fiji-slurm</connection>
 		<developerConnection>scm:git:git@github.com/tischi/fiji-slurm</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/tischi/fiji-slurm</url>
@@ -97,12 +98,13 @@
 		<system>GitHub Issues</system>
 		<url>https://github.com/tischi/fiji-slurm/issues</url>
 	</issueManagement>
+
 	<ciManagement>
 		<system>None</system>
 	</ciManagement>
 
 	<properties>
-		<package-name>de.embl.cba.registration</package-name>
+		<package-name>de.embl.cba.cluster</package-name>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 		<imagej.app.directory>/Applications/Fiji.app/</imagej.app.directory>
