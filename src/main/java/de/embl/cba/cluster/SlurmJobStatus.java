@@ -8,6 +8,11 @@ public abstract class SlurmJobStatus
 {
     public static final String COMPLETED = "COMPLETED";
 
+    public static final String CANCELLED = "CANCELLED";
+    public static final String RUNNING = "RUNNING";
+    public static final String PENDING = "PENDING";
+
+
     public static void monitorJobStatusAndShowOutAndErrWhenDone( SlurmJobFuture future ) throws IOException
     {
         for ( ; ; )
@@ -23,6 +28,7 @@ public abstract class SlurmJobStatus
         }
     }
 
+
     private static void logJobOutput( SlurmJobFuture future ) throws IOException
     {
         Logger.log( future.getOutput() );
@@ -35,7 +41,7 @@ public abstract class SlurmJobStatus
 
     private static String logJobStatus( SlurmJobFuture future )
     {
-        String status = future.status();
+        String status = future.getStatus();
         Logger.log( "Status of job " + future.jobID + " is " + status + "\n" );
         return status;
     }

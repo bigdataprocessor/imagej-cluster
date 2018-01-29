@@ -23,38 +23,81 @@ public class SlurmJobFuture implements Future
 
     public boolean cancel( boolean mayInterruptIfRunning )
     {
+        // TODO
         return false;
     }
 
     public boolean isCancelled()
     {
-        return false;
+        String status = executorService.getJobStatus( jobID );
+
+        if ( status.equals( SlurmJobStatus.CANCELLED ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
     }
 
     public boolean isDone()
     {
-        executorService.checkJobStatus( jobID );
-        return false;
+        String status = executorService.getJobStatus( jobID );
+
+        if ( status.equals( SlurmJobStatus.COMPLETED ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
-    public String getError() throws IOException
+    public String getError()
     {
-        return executorService.readJobError( jobID );
+        String error;
+        try
+        {
+            error = executorService.readJobError( jobID );
+        }
+        catch ( IOException e )
+        {
+            return e.toString();
+        }
+        return error;
     }
 
-    public String getOutput() throws IOException
+    public String getOutput()
     {
-        return executorService.readJobOutput( jobID );
+        String output;
+        try
+        {
+            output = executorService.readJobOutput( jobID );
+        }
+        catch ( IOException e )
+        {
+            return e.toString();
+        }
+
+        return output;
     }
 
-
-    public String status()
+    public String getStatus()
     {
-        return executorService.checkJobStatus( jobID );
+        return executorService.getJobStatus( jobID );
     }
 
     public Object get() throws InterruptedException, ExecutionException
     {
+        while ( executorService.getJobStatus( jobID ).equals( SlurmJobStatus.PENDING )
+                || executorService.getJobStatus( jobID ).equals( SlurmJobStatus.RUNNING ) )
+        {
+            // wait
+        }
+
         return null;
     }
 

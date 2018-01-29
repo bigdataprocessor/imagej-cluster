@@ -24,7 +24,7 @@ public class SlurmExecutorService implements ExecutorService
     private final String JOB_STATUS_COMMAND = "sacct -j ";
 
     private final String SUCCESSFUL_JOB_SUBMISSION_RESPONSE = "Submitted batch job ";
-    private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job status";
+    private final String COULD_NOT_DETERMINE_JOB_STATUS = "Could not determine job getStatus";
 
     public static final String OUTPUT = ".out";
     public static final String ERROR = ".err";
@@ -213,7 +213,7 @@ public class SlurmExecutorService implements ExecutorService
         }
     }
 
-    public String checkJobStatus( long jobID )
+    public String getJobStatus( long jobID )
     {
         String cmd = JOB_STATUS_COMMAND + jobID + " --format=State";
 

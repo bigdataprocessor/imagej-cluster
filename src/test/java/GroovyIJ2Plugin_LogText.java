@@ -23,8 +23,8 @@ public class GroovyIJ2Plugin_logText
 
         for ( int i = 0; i < 10; ++i )
         {
-            String status = future.status();
-            System.out.print( "SlurmJob status: " + status );
+            String status = future.getStatus();
+            System.out.print( "SlurmJob getStatus: " + status );
         }
 
     }
