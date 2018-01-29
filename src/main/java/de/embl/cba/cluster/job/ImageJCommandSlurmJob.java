@@ -2,6 +2,8 @@ package de.embl.cba.cluster.job;
 
 import de.embl.cba.cluster.SlurmExecutorService;
 
+import java.util.ArrayList;
+
 public class ImageJCommandSlurmJob implements SlurmJob
 {
 
@@ -9,11 +11,11 @@ public class ImageJCommandSlurmJob implements SlurmJob
     public static final String ALMF_CLUSTER_IMAGEJ_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run";
     public static final String CBA_CLUSTER_IMAGEJ = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --ij2 --run";
 
-    private String commandAndParameters;
+    private ArrayList< String > commands;
 
-    public ImageJCommandSlurmJob( String commandAndParameters)
+    public ImageJCommandSlurmJob( ArrayList< String > commands )
     {
-        this.commandAndParameters = commandAndParameters;
+        this.commands = commands;
     }
 
     @Override
@@ -23,7 +25,11 @@ public class ImageJCommandSlurmJob implements SlurmJob
 
         slurmJobScript.addExecutableCommand( "module load Java" );
         slurmJobScript.addExecutableCommand( "module load X11" );
-        slurmJobScript.addExecutableCommand( commandAndParameters );
+
+        for ( String command : commands )
+        {
+            slurmJobScript.addExecutableCommand( command );
+        }
 
         return slurmJobScript.jobText( slurmExecutorService );
 

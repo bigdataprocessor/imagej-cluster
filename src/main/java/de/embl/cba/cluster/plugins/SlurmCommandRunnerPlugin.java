@@ -12,6 +12,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.TextWidget;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Plugin(type = Command.class, menuPath = "Plugins>EMBL>Cluster Command Runner" )
 public class SlurmCommandRunnerPlugin implements Command
@@ -22,13 +23,25 @@ public class SlurmCommandRunnerPlugin implements Command
     @Parameter(label = "Password", style = TextWidget.PASSWORD_STYLE )
     private String password;
 
-    @Parameter(label = "Command and parameters" )
-    private String commandAndParameters;
+    @Parameter(label = "Command 1" )
+    private String command1;
+
+    @Parameter(label = "Command 2" )
+    private String command2;
+
+    @Parameter(label = "Command 3" )
+    private String command3;
+
 
     public void run()
     {
 
-        ImageJCommandSlurmJob imageJCommandSlurmJob = new ImageJCommandSlurmJob( commandAndParameters );
+        ArrayList< String > commands = new ArrayList<>(  );
+        commands.add( command1 );
+        commands.add( command2 );
+        commands.add( command3 );
+
+        ImageJCommandSlurmJob imageJCommandSlurmJob = new ImageJCommandSlurmJob( commands );
 
         SSHConnectorSettings sshConnectorSettings = new SSHConnectorSettings( username, password, SSHConnectorSettings.EMBL_SLURM_HOST );
 
