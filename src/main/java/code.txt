@@ -1,0 +1,44 @@
+private void setJobID( ArrayList< String > systemResponse )
+    {
+        try
+        {
+            if ( systemResponse.get( 0 ).contains( successfulJobSubmissionResponse ) )
+            {
+                String tmp = systemResponse.get( 0 ).replace( successfulJobSubmissionResponse, "" );
+                jobID = Integer.parseInt( tmp.trim() );
+            }
+            else
+            {
+                Logger.error( "Job submission failed!" );
+            }
+
+        }
+        catch ( Exception e )
+        {
+            // TODO
+            e.printStackTrace();
+        }
+    }
+    }
+
+
+
+            try
+            {
+
+                if ( response.get( 0 ).contains( successfulJobSubmissionResponse ) )
+                {
+                    String tmp = response.get( 0 ).replace( successfulJobSubmissionResponse, "" );
+                    jobID = Integer.parseInt( tmp.trim() );
+                }
+                else
+                {
+                    Logger.error( "Job submission failed!" );
+                }
+
+            }
+            catch ( Exception e )
+            {
+                // TODO
+                e.printStackTrace();
+            }

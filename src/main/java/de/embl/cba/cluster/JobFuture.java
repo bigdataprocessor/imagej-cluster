@@ -1,23 +1,20 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.cluster.job.SlurmJob;
-
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SlurmJobFuture implements Future
+public class JobFuture implements Future
 {
-    SlurmJob slurmJob;
-    SlurmExecutorService executorService;
+
+    SSHExecutorService executorService;
     long jobID;
 
-    public SlurmJobFuture( SlurmExecutorService executorService, SlurmJob slurmJob, long jobID )
+    public JobFuture( SSHExecutorService executorService, long jobID )
     {
         this.executorService = executorService;
-        this.slurmJob = slurmJob;
         this.jobID = jobID;
     }
 
@@ -61,7 +58,7 @@ public class SlurmJobFuture implements Future
         String error;
         try
         {
-            error = executorService.readJobError( jobID );
+            error = executorService.getJobError( jobID );
         }
         catch ( IOException e )
         {
@@ -75,7 +72,7 @@ public class SlurmJobFuture implements Future
         String output;
         try
         {
-            output = executorService.readJobOutput( jobID );
+            output = executorService.getJobOutput( jobID );
         }
         catch ( IOException e )
         {

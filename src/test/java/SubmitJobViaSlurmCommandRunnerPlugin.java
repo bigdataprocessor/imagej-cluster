@@ -9,8 +9,7 @@ import org.scijava.widget.TextWidget;
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.embl.cba.cluster.job.ImageJCommandSlurmJob.ALMF_CLUSTER_IMAGEJ_HEADLESS;
-import static de.embl.cba.cluster.job.ImageJCommandSlurmJob.ALMF_CLUSTER_IMAGEJ_XVFB;
+import static de.embl.cba.cluster.job.SlurmJob.ALMF_CLUSTER_IMAGEJ_HEADLESS;
 
 @Plugin(type = Command.class, menuPath = "Plugins>EMBL>Test" )
 public class SubmitJobViaSlurmCommandRunnerPlugin implements Command

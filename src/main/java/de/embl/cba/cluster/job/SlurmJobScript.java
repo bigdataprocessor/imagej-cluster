@@ -1,6 +1,6 @@
 package de.embl.cba.cluster.job;
 
-import de.embl.cba.cluster.SlurmExecutorService;
+import de.embl.cba.cluster.SSHExecutorService;
 import de.embl.cba.cluster.SlurmQueues;
 
 import java.util.ArrayList;
@@ -36,23 +36,25 @@ public class SlurmJobScript
         executableCommands = commands;
     }
 
-    public String jobText( SlurmExecutorService slurmExecutorService )
+    public String jobText( SSHExecutorService SSHExecutorService )
     {
 
         ArrayList < String > lines = new ArrayList< >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + slurmExecutorService.getCurrentJobErrPath() );
-        lines.add( "#SBATCH -o " + slurmExecutorService.getCurrentJobOutPath() );
+        lines.add( "#SBATCH -e " + SSHExecutorService.getCurrentJobErrPath() );
+        lines.add( "#SBATCH -o " + SSHExecutorService.getCurrentJobOutPath() );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + queue );
         lines.add( "ulimit -c 0" );
-        lines.add( "echo \"job started\"" );
-        lines.add( "hostname" );;
+
+        lines.add( SSHExecutorService.getReportJobStartedCommand() );
+
         for ( String r : executableCommands ) lines.add ( r );
-        lines.add( "echo \"job finished\"" );
+
+        lines.add( SSHExecutorService.getReportJobFinishedCommand() );
 
         return String.join( "\n", lines );
 

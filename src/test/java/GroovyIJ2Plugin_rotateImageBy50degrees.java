@@ -1,8 +1,8 @@
 import de.embl.cba.cluster.job.ImageJGroovyScriptSlurmJob;
-import de.embl.cba.cluster.job.SlurmJob;
+import de.embl.cba.cluster.job.Job;
 import de.embl.cba.cluster.ssh.SSHConnectorSettings;
-import de.embl.cba.cluster.SlurmExecutorService;
-import de.embl.cba.cluster.SlurmJobFuture;
+import de.embl.cba.cluster.SSHExecutorService;
+import de.embl.cba.cluster.JobFuture;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +19,13 @@ public class GroovyIJ2Plugin_rotateImageBy50degrees
 
         SSHConnectorSettings sshConnectorSettings = new SSHConnectorSettings( "tischer", "pwd", SSHConnectorSettings.EMBL_SLURM_HOST );
 
-        SlurmExecutorService executorService = new SlurmExecutorService( sshConnectorSettings );
-        SlurmJobFuture future = executorService.submit( (SlurmJob ) scriptJob );
+        SSHExecutorService executorService = new SSHExecutorService( sshConnectorSettings );
+        JobFuture future = executorService.submit( (Job ) scriptJob );
 
         for ( int i = 0; i < 10; ++i )
         {
             String status = future.getStatus();
-            System.out.print( "SlurmJob getStatus: " + status );
+            System.out.print( "Job getStatus: " + status );
         }
 
     }

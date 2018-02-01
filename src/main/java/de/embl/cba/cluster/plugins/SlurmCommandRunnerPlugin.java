@@ -1,6 +1,6 @@
 package de.embl.cba.cluster.plugins;
 
-import de.embl.cba.cluster.SlurmJobSubmitter;
+import de.embl.cba.cluster.ImageJJobSubmitter;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -35,7 +35,7 @@ public class SlurmCommandRunnerPlugin implements Command
         commands.add( command1 );
         commands.add( command2 );
 
-        SlurmJobSubmitter.submit( commands, username, password );
+        ImageJJobSubmitter.submit( commands, username, password );
 
     }
 

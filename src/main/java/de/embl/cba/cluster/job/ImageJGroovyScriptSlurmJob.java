@@ -63,7 +63,7 @@ public class ImageJGroovyScriptSlurmJob
 
     }
 
-    public void manageDependencies( SlurmExecutorService executorService ) throws IOException
+    public void manageDependencies( SSHExecutorService executorService ) throws IOException
     {
         manageJobDirectoryDependency( executorService.getJobDirectory( 0 ) );
         manageGroovyScriptDependency( executorService.getJobDirectory(0) );
@@ -198,11 +198,11 @@ public class ImageJGroovyScriptSlurmJob
         dependencies.get( OUTPUT_DIRECTORY ).remoteObject = remoteJobDirectory;
     }
 
-    public String getJobText( SlurmExecutorService slurmExecutorService )
+    public String getJobText( SSHExecutorService SSHExecutorService )
     {
         slurmJobScript.setExecutableCommands( jobScriptCommands() );
 
-        return slurmJobScript.jobText( slurmExecutorService );
+        return slurmJobScript.jobText( SSHExecutorService );
     }
 
     public void setLocalGroovyScript( File file ) throws IOException

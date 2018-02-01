@@ -101,6 +101,12 @@ public class SSHConnector
         }
     }
 
+    public String remoteFileSeparator()
+    {
+        // TODO
+        return File.separator;
+    }
+
     private void addToSystemResponses( String output )
     {
         String[] strings = output.split( "\n" );
@@ -126,19 +132,35 @@ public class SSHConnector
 
     public void saveTextAsFileOnRemoteServerUsingSFTP( String text,
                                                        String remoteDirectory,
-                                                       String remoteFileName ) throws Exception
+                                                       String remoteFileName )
     {
-        Logger.log( "# Saving text as remote file:");
-        Logger.log( "Remote file path: " + remoteDirectory + "/" + remoteFileName );
-        Logger.log( "Text: " );
-        Logger.log( text );
+        try
+        {
+            Logger.log( "# Saving text as remote file:");
+            Logger.log( "Remote file path: " + remoteDirectory + "/" + remoteFileName );
+            Logger.log( "Text: " );
+            Logger.log( text );
 
-        ChannelSftp channelSftp = createSftpChannel();
+            ChannelSftp channelSftp = createSftpChannel();
+            channelSftp.cd( remoteDirectory );
+            channelSftp.put( asInputStream( text ), remoteFileName );
+            channelSftp.disconnect();
 
-        channelSftp.cd( remoteDirectory );
-        channelSftp.put( asInputStream( text ), remoteFileName );
+        }
+        catch ( JSchException e )
+        {
+            e.printStackTrace();
+        }
+        catch ( SftpException e )
+        {
+            e.printStackTrace();
+        }
+        catch ( UnsupportedEncodingException e )
+        {
+            e.printStackTrace();
+        }
 
-        channelSftp.disconnect();
+
     }
 
     public void rename( String oldPath, String newPath )

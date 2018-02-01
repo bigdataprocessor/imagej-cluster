@@ -13,7 +13,7 @@ public abstract class SlurmJobStatus
     public static final String PENDING = "PENDING";
 
 
-    public static void monitorJobStatusAndShowOutAndErrWhenDone( SlurmJobFuture future ) throws IOException
+    public static void monitorJobStatusAndShowOutAndErrWhenDone( JobFuture future ) throws IOException
     {
         for ( ; ; )
         {
@@ -29,17 +29,17 @@ public abstract class SlurmJobStatus
     }
 
 
-    private static void logJobOutput( SlurmJobFuture future ) throws IOException
+    private static void logJobOutput( JobFuture future ) throws IOException
     {
         Logger.log( future.getOutput() );
     }
 
-    private static void logJobError( SlurmJobFuture future ) throws IOException
+    private static void logJobError( JobFuture future ) throws IOException
     {
         Logger.log( future.getError() );
     }
 
-    private static String logJobStatus( SlurmJobFuture future )
+    private static String logJobStatus( JobFuture future )
     {
         String status = future.getStatus();
         Logger.log( "Status of job " + future.jobID + " is " + status + "\n" );
