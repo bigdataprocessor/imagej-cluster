@@ -6,19 +6,27 @@ import de.embl.cba.cluster.logger.Logger;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Vector;
+
+import static com.jcraft.jsch.ChannelSftp.SSH_FX_NO_SUCH_FILE;
 
 
 // TODO: saveTextAsFile -> how to do the error handling?
 
 public class SSHConnector
 {
-    private SSHConnectorSettings loginSettings;
+    private SSHConnectorConfig loginSettings;
 
     private ChannelExec channelExec;
     private Session session;
-    private ArrayList< String > systemResponses;
+    private ArrayList< String > systemOut;
+    private ArrayList< String > systemErr;
 
-    public SSHConnector( SSHConnectorSettings loginSettings )
+    public static final String OUTPUT = "out";
+    public static final String ERROR = "err";
+
+    public SSHConnector( SSHConnectorConfig loginSettings )
     {
         this.loginSettings = loginSettings;
     }
@@ -50,22 +58,22 @@ public class SSHConnector
 
     public String ls( String directory )
     {
-        ArrayList< String > responses = executeCommand( "ls -la " + directory );
+        HashMap< String, ArrayList<String> >  responses = executeCommand( "ls -la " + directory );
 
-        return String.join( "\n" , responses );
+        return String.join( "\n" , responses.get( SSHConnector.OUTPUT ) );
     }
 
-    public ArrayList<String> executeCommand( String command )
+    public HashMap< String, ArrayList<String> > executeCommand( String command )
     {
         Logger.log( "# Executing remote command: " + command );
         connectSession();
 
         execute( command );
-        recordSystemResponseText();
+        HashMap< String, ArrayList<String> > systemResponse = recordSystemResponseText();
 
         disconnect();
 
-        return systemResponses;
+        return systemResponse;
     }
 
     private void disconnect()
@@ -74,7 +82,7 @@ public class SSHConnector
         session.disconnect();
     }
 
-    private void recordSystemResponseText()
+    private HashMap< String, ArrayList<String> > recordSystemResponseText()
     {
         InputStream out = null;
         try
@@ -87,9 +95,14 @@ public class SSHConnector
             String output = asString( out );
             String error = asString( err );
 
-            systemResponses = new ArrayList< String >(  );
-            addToSystemResponses( output );
-            addToSystemResponses( error );
+            systemOut = asListOfLines( output );
+            systemErr = asListOfLines( error );
+
+            HashMap< String, ArrayList<String> > systemResponses = new HashMap<>();
+            systemResponses.put( OUTPUT, systemOut );
+            systemResponses.put( ERROR, systemErr );
+            return systemResponses;
+
         }
         catch ( IOException e )
         {
@@ -99,6 +112,8 @@ public class SSHConnector
         {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     public String remoteFileSeparator()
@@ -107,13 +122,16 @@ public class SSHConnector
         return File.separator;
     }
 
-    private void addToSystemResponses( String output )
+    private ArrayList< String > asListOfLines( String output )
     {
+        ArrayList< String > listOfLines = new ArrayList<>(  );
         String[] strings = output.split( "\n" );
         for ( String string : strings )
         {
-            systemResponses.add( string );
+            listOfLines.add( string );
         }
+        return listOfLines;
+
     }
 
     private void execute( String command )
@@ -130,20 +148,48 @@ public class SSHConnector
 
     }
 
+    public boolean fileExists( String path )
+    {
+
+        Vector result = null;
+        ChannelSftp channelSftp = null;
+
+        try {
+            channelSftp = createSftpChannel();
+            result = channelSftp.ls( path );
+        }
+        catch (SftpException e) {
+            if (e.id == SSH_FX_NO_SUCH_FILE)
+            {
+                channelSftp.disconnect();
+                return false;
+            }
+        }
+        catch ( JSchException e )
+        {
+            e.printStackTrace();
+            return false;
+        }
+
+        channelSftp.disconnect();
+
+        return result != null && !result.isEmpty();
+    }
+
     public void saveTextAsFileOnRemoteServerUsingSFTP( String text,
-                                                       String remoteDirectory,
-                                                       String remoteFileName )
+                                                       String directory,
+                                                       String filename )
     {
         try
         {
             Logger.log( "# Saving text as remote file:");
-            Logger.log( "Remote file path: " + remoteDirectory + "/" + remoteFileName );
+            Logger.log( "Remote file path: " + directory + "/" + filename );
             Logger.log( "Text: " );
             Logger.log( text );
 
             ChannelSftp channelSftp = createSftpChannel();
-            channelSftp.cd( remoteDirectory );
-            channelSftp.put( asInputStream( text ), remoteFileName );
+            channelSftp.cd( directory );
+            channelSftp.put( asInputStream( text ), filename );
             channelSftp.disconnect();
 
         }

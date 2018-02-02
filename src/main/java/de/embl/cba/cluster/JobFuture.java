@@ -1,6 +1,7 @@
 package de.embl.cba.cluster;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -8,9 +9,12 @@ import java.util.concurrent.TimeoutException;
 
 public class JobFuture implements Future
 {
-
     SSHExecutorService executorService;
     long jobID;
+
+    public static final String STD_OUT = "StdOut";
+    public static final String STD_ERR = "StdErr";
+
 
     public JobFuture( SSHExecutorService executorService, long jobID )
     {
@@ -26,9 +30,13 @@ public class JobFuture implements Future
 
     public boolean isCancelled()
     {
-        String status = executorService.getJobStatus( jobID );
+        // TODO
+        return false;
+    }
 
-        if ( status.equals( SlurmJobStatus.CANCELLED ) )
+    public boolean isRunning()
+    {
+        if ( executorService.isStarted( jobID ) && ! executorService.isDone( jobID ) )
         {
             return true;
         }
@@ -36,66 +44,41 @@ public class JobFuture implements Future
         {
             return false;
         }
-
     }
 
     public boolean isDone()
     {
-        String status = executorService.getJobStatus( jobID );
-
-        if ( status.equals( SlurmJobStatus.COMPLETED ) )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return executorService.isDone( jobID );
     }
 
     public String getError()
     {
-        String error;
-        try
-        {
-            error = executorService.getJobError( jobID );
-        }
-        catch ( IOException e )
-        {
-            return e.toString();
-        }
-        return error;
+        return executorService.getJobError( jobID );
     }
 
     public String getOutput()
     {
-        String output;
-        try
-        {
-            output = executorService.getJobOutput( jobID );
-        }
-        catch ( IOException e )
-        {
-            return e.toString();
-        }
-
-        return output;
-    }
-
-    public String getStatus()
-    {
-        return executorService.getJobStatus( jobID );
+        return executorService.getJobOutput( jobID );
     }
 
     public Object get() throws InterruptedException, ExecutionException
     {
-        while ( executorService.getJobStatus( jobID ).equals( SlurmJobStatus.PENDING )
-                || executorService.getJobStatus( jobID ).equals( SlurmJobStatus.RUNNING ) )
+        HashMap< String, Object > results = new HashMap<>(  );
+
+        while ( ! executorService.isDone( jobID ) )
         {
-            // wait
+            Thread.sleep( 500 );
+
+            if ( executorService.getJobError( jobID ).length() > 0 )
+            {
+                results.put( STD_ERR, executorService.getJobError( jobID ) );
+                return results;
+            }
         }
 
-        return null;
+        results.put( STD_OUT, executorService.getJobOutput( jobID ) );
+
+        return results;
     }
 
     public Object get( long timeout, TimeUnit unit ) throws InterruptedException, ExecutionException, TimeoutException

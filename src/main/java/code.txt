@@ -42,3 +42,21 @@ private void setJobID( ArrayList< String > systemResponse )
                 // TODO
                 e.printStackTrace();
             }
+
+
+ private String getSlurmJobStatus( long jobID )
+    {
+        String cmd = SLURM_JOB_STATUS_COMMAND + jobID + " --format=State";
+
+        try
+        {
+            HashMap< String, ArrayList< String > > responses = sshConnector.executeCommand( cmd );
+            String lastResponse = responses.get( responses.size() - 2 );
+            return lastResponse.trim();
+        }
+        catch ( Exception e )
+        {
+            return COULD_NOT_DETERMINE_JOB_STATUS;
+        }
+
+    }

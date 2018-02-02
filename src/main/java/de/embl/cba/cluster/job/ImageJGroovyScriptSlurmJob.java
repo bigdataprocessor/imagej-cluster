@@ -41,7 +41,7 @@ public class ImageJGroovyScriptSlurmJob
 
     private void configureJobScript()
     {
-        slurmJobScript = new SlurmJobScript();
+        slurmJobScript = new SlurmJobScript( null );
         slurmJobScript.queue = SlurmQueues.DEFAULT_QUEUE;
         slurmJobScript.memoryPerJobInMegaByte = 10000;
         slurmJobScript.numWorkersPerNode = 4;
@@ -65,10 +65,10 @@ public class ImageJGroovyScriptSlurmJob
 
     public void manageDependencies( SSHExecutorService executorService ) throws IOException
     {
-        manageJobDirectoryDependency( executorService.getJobDirectory( 0 ) );
-        manageGroovyScriptDependency( executorService.getJobDirectory(0) );
-        manageInputImageDependency( executorService.getJobDirectory(0) );
-        manageOutputDirectoryDependency( executorService.getJobDirectory(0) );
+        manageJobDirectoryDependency( executorService.getJobDirectory() );
+        manageGroovyScriptDependency( executorService.getJobDirectory() );
+        manageInputImageDependency( executorService.getJobDirectory() );
+        manageOutputDirectoryDependency( executorService.getJobDirectory() );
     }
 
     public void addGroovyScriptParameter( String key, String value )
@@ -196,13 +196,6 @@ public class ImageJGroovyScriptSlurmJob
     private void manageOutputDirectoryDependency( String remoteJobDirectory )
     {
         dependencies.get( OUTPUT_DIRECTORY ).remoteObject = remoteJobDirectory;
-    }
-
-    public String getJobText( SSHExecutorService SSHExecutorService )
-    {
-        slurmJobScript.setExecutableCommands( jobScriptCommands() );
-
-        return slurmJobScript.jobText( SSHExecutorService );
     }
 
     public void setLocalGroovyScript( File file ) throws IOException

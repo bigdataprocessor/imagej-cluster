@@ -1,12 +1,13 @@
 package de.embl.cba.cluster.ssh;
 
-public class SSHConnectorSettings
+public class SSHConnectorConfig
 {
     public static final String EMBL_SLURM_HOST = "login.cluster.embl.de";
+    public static final String LOCALHOST = "localhost";
 
-    private String user = "tischer";
-    private String password = "password";
-    private String host = EMBL_SLURM_HOST;
+    private String user;
+    private String password;
+    private String host;
     public int port = 22;
 
     public String getHost()
@@ -24,7 +25,7 @@ public class SSHConnectorSettings
         return password;
     }
 
-    public SSHConnectorSettings( String user, String password, String host )
+    public SSHConnectorConfig( String user, String password, String host )
     {
         this.user = user;
         this.password = password;
