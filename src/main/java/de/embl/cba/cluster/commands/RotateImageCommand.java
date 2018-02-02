@@ -68,7 +68,7 @@ public class RotateImageCommand implements Command
         runAlgorithm();
         putData();
 
-        if ( quitAfterRun ) Commands.quitImageJ();
+        if ( quitAfterRun ) Commands.quitImageJ( logService );
 
     }
 
@@ -108,7 +108,7 @@ public class RotateImageCommand implements Command
             if ( inputImage == null )
             {
                 logService.error( "Loading of " + inputImagePath + "failed!" );
-                if ( quitAfterRun ) Commands.quitImageJ();
+                if ( quitAfterRun ) Commands.quitImageJ( logService );
             }
         }
     }

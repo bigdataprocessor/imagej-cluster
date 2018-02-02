@@ -2,6 +2,7 @@ package de.embl.cba.cluster.commands;
 
 import ij.IJ;
 import ij.ImageJ;
+import org.scijava.log.LogService;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -57,9 +58,9 @@ public abstract class Commands
         return command;
     }
 
-    static void quitImageJ()
+    public static void quitImageJ( LogService logService )
     {
-        ImageJ ij = IJ.getInstance();
-        if (ij!=null) ij.quit();
+        logService.info( "Quitting ImageJ" );
+        System.exit( 0 );
     }
 }

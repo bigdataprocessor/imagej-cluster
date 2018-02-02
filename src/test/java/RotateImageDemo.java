@@ -113,7 +113,8 @@ public class RotateImageDemo implements Command
 
     private Future submitOnLocalMac( String pluginName, Map< String, Object > parameters )
     {
-        Future future;ImageJCommandsSubmitter commandsSubmitter = new ImageJCommandsSubmitter(
+        Future future;
+        ImageJCommandsSubmitter commandsSubmitter = new ImageJCommandsSubmitter(
                         ImageJCommandsSubmitter.EXECUTION_SYSTEM_MAC_OS_LOCALHOST,
                         "/Users/tischer/Documents/tmp",
                         ImageJCommandsSubmitter.IMAGEJ_EXECUTABLE_MAC_OS,

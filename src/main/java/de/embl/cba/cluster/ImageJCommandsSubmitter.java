@@ -41,6 +41,11 @@ public class ImageJCommandsSubmitter
     }
 
 
+    public void clearCommands()
+    {
+        commandsWithParameters.clear();
+    }
+
     public void addCommand( String command, Map<String, Object> parameters )
     {
         String commandWithParameters = Commands.createCommandAndParameterString( command, parameters );

@@ -61,19 +61,13 @@ public class JobFuture implements Future
         return executorService.getJobOutput( jobID );
     }
 
-    public Object get() throws InterruptedException, ExecutionException
+    public HashMap< String, Object > get() throws InterruptedException, ExecutionException
     {
         HashMap< String, Object > results = new HashMap<>(  );
 
         while ( ! executorService.isDone( jobID ) )
         {
             Thread.sleep( 500 );
-
-            if ( executorService.getJobError( jobID ).length() > 0 )
-            {
-                results.put( STD_ERR, executorService.getJobError( jobID ) );
-                return results;
-            }
         }
 
         results.put( STD_OUT, executorService.getJobOutput( jobID ) );
