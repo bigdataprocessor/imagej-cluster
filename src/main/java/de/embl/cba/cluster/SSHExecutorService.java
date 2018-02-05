@@ -1,7 +1,7 @@
 package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
-import de.embl.cba.cluster.logger.Logger;
+import embl.cba.logging.Logger;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
 import java.io.IOException;
@@ -155,12 +155,12 @@ public class SSHExecutorService implements ExecutorService
     {
         try
         {
-            Logger.log( "Creating remote directory: " + jobDirectory );
+            Utils.logger.info( "Creating remote directory: " + jobDirectory );
             sshConnector.executeCommand( makeRemoteDirectoryCommand + jobDirectory );
         }
         catch ( Exception e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
     }
 

@@ -1,7 +1,8 @@
 package de.embl.cba.cluster.ssh;
 
 import com.jcraft.jsch.*;
-import de.embl.cba.cluster.logger.Logger;
+import de.embl.cba.cluster.Utils;
+import embl.cba.logging.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -36,9 +37,9 @@ public class SSHConnector
         return loginSettings.getUser();
     }
 
-    private void connectSession()
+    private boolean connectSession()
     {
-        //Logger.log( "Establishing SSH connection to " + loginSettings.getHost() + "...");
+        //Utils.logger.info( "Establishing SSH connection to " + loginSettings.getHost() + "...");
 
         JSch jsch = new JSch();
         try
@@ -47,12 +48,15 @@ public class SSHConnector
             session.setPassword( loginSettings.getPassword() );
             session.setConfig( "StrictHostKeyChecking", "no" );
             session.connect();
+            return true;
         }
         catch ( JSchException e )
         {
-            e.printStackTrace();
+           Utils.logger.error( "Could not connect to remote server!\n" +
+                   "Probably username and/or password were not correct." );
+           return false;
         }
-        //Logger.done();
+        //Utils.logger.done();
     }
 
 
@@ -65,8 +69,9 @@ public class SSHConnector
 
     public HashMap< String, ArrayList<String> > executeCommand( String command )
     {
-        Logger.log( "# Executing remote command: " + command );
-        connectSession();
+        Utils.logger.info( "# Executing remote command: " + command );
+
+        if ( ! connectSession() ) return null;
 
         execute( command );
         HashMap< String, ArrayList<String> > systemResponse = recordSystemResponseText();
@@ -182,10 +187,10 @@ public class SSHConnector
     {
         try
         {
-            Logger.log( "# Saving text as remote file:");
-            Logger.log( "Remote file path: " + directory + "/" + filename );
-            Logger.log( "Text: " );
-            Logger.log( text );
+            Utils.logger.info( "# Saving text as remote file:");
+            Utils.logger.info( "Remote file path: " + directory + "/" + filename );
+            Utils.logger.info( "Text: " );
+            Utils.logger.info( text );
 
             ChannelSftp channelSftp = createSftpChannel();
             channelSftp.cd( directory );
@@ -213,9 +218,9 @@ public class SSHConnector
     {
         try
         {
-            Logger.log( "# Renaming remote file:" );
-            Logger.log( "Original path: " + oldPath );
-            Logger.log( "New path: " + newPath );
+            Utils.logger.info( "# Renaming remote file:" );
+            Utils.logger.info( "Original path: " + oldPath );
+            Utils.logger.info( "New path: " + newPath );
 
             ChannelSftp channelSftp = createSftpChannel();
 
@@ -226,17 +231,17 @@ public class SSHConnector
         }
         catch ( JSchException e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
         catch ( SftpException e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
     }
 
     private ChannelSftp createSftpChannel() throws JSchException
     {
-        connectSession();
+        if ( ! connectSession() ) return null;
 
         ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
         channelSftp.connect();
@@ -247,7 +252,7 @@ public class SSHConnector
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
     {
-        Logger.log( "# Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
+        Utils.logger.info( "# Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
 
         try
         {
@@ -264,15 +269,15 @@ public class SSHConnector
         }
         catch ( JSchException e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
         catch ( IOException e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
         catch ( SftpException e )
         {
-            Logger.error( e.toString() );
+            Utils.logger.error( e.toString() );
         }
 
         return "Error reading file...";

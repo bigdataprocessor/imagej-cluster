@@ -117,6 +117,11 @@
 			<url>http://central.maven.org/maven2/</url>
 		</repository>
 
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+
 	</repositories>
 
 	<dependencies>
@@ -158,8 +163,16 @@
             <version>0.1.54</version>
         </dependency>
 
-	</dependencies>
+		<dependency>
+			<groupId>com.github.ssgpers</groupId>
+			<artifactId>java-utils--embl-cba</artifactId>
+            <version>38315bceac840445b6bc1b907cb58839c0ca75c1</version>
 
+            <!-- <version>38315bceac840445b6bc1b907cb58839c0ca75c1</version> -->
+		</dependency>
+
+
+	</dependencies>
 
 
 
