@@ -39,6 +39,7 @@ public class ImageJCommandsSubmitter
         this.password = password;
         this.remoteJobDirectory = remoteJobDirectory;
         ijCommandsWithParameters = new ArrayList<>();
+        linuxCommands = new ArrayList<>();
     }
 
 
