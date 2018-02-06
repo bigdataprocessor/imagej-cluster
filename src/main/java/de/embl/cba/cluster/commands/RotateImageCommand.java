@@ -18,7 +18,7 @@ import java.io.File;
 
 import static de.embl.cba.cluster.commands.RotateImageCommand.PLUGIN_NAME;
 
-@Plugin(type = Command.class, menuPath = "Plugins>Segmentation>EMBL-CBA>"+PLUGIN_NAME )
+@Plugin(type = Command.class, menuPath = "Plugins>Registration>Development>"+PLUGIN_NAME )
 public class RotateImageCommand implements Command
 {
     public static final String PLUGIN_NAME = "Rotate Image";

@@ -120,7 +120,7 @@ public class RotateImageDemo implements Command
                         ImageJCommandsSubmitter.IMAGEJ_EXECUTABLE_MAC_OS,
                         "tischer", password );
 
-        commandsSubmitter.addCommand( pluginName, parameters );
+        commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
         future = commandsSubmitter.submitCommands();
         return future;
     }
@@ -134,7 +134,7 @@ public class RotateImageDemo implements Command
             ImageJCommandsSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB,
             "tischer", password );
 
-        commandsSubmitter.addCommand( pluginName, parameters );
+        commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
 
         return commandsSubmitter.submitCommands();
     }

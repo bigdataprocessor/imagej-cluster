@@ -28,7 +28,8 @@ public class ImageJCommandsSubmitter
     private String password;
     private String remoteJobDirectory;
 
-    private ArrayList< String > commandsWithParameters;
+    private ArrayList< String > linuxCommands;
+    private ArrayList< String > ijCommandsWithParameters;
 
     public ImageJCommandsSubmitter( String executionSystem, String remoteJobDirectory, String remoteImageJExectuable, String username, String password )
     {
@@ -37,27 +38,51 @@ public class ImageJCommandsSubmitter
         this.username = username;
         this.password = password;
         this.remoteJobDirectory = remoteJobDirectory;
-        commandsWithParameters = new ArrayList<>();
+        ijCommandsWithParameters = new ArrayList<>();
     }
 
 
     public void clearCommands()
     {
-        commandsWithParameters.clear();
+        ijCommandsWithParameters.clear();
     }
 
-    public void addCommand( String command, Map<String, Object> parameters )
+    public void addIJCommandWithParameters( String command, Map<String, Object> parameters )
     {
         String commandWithParameters = Commands.createCommandAndParameterString( command, parameters );
-        commandsWithParameters.add( commandWithParameters );
+        ijCommandsWithParameters.add( commandWithParameters );
     }
+
+    public void addLinuxCommand( String command )
+    {
+        linuxCommands.add( command );
+    }
+
 
     public JobFuture submitCommands( )
     {
 
-        ArrayList< String > ijBinaryAndCommandAndParameters = prependIJBinary( commandsWithParameters );
+        ArrayList< String > ijBinaryAndCommandAndParameters = prependIJBinary( ijCommandsWithParameters );
 
-        JobScript jobScript = createJobScript( ijBinaryAndCommandAndParameters );
+        ArrayList< String > allCommands = new ArrayList<>();
+
+        for ( String linuxCommand : linuxCommands )
+        {
+            allCommands.add( linuxCommand );
+        }
+
+        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        {
+            allCommands.add( 0 , "module load Java" );
+            allCommands.add( 0 , "module load X11" );
+        }
+
+        for ( String ijCommand : ijBinaryAndCommandAndParameters )
+        {
+            allCommands.add( ijCommand );
+        }
+
+        JobScript jobScript = createJobScript( allCommands );
 
         JobFuture future = submitJobScript( jobScript );
 
@@ -115,12 +140,6 @@ public class ImageJCommandsSubmitter
     private  ArrayList< String > prependIJBinary( ArrayList< String > commands )
     {
         ArrayList< String > completeCommands = new ArrayList<>(  );
-
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
-        {
-            completeCommands.add( 0 , "module load Java" );
-            completeCommands.add( 0 , "module load X11" );
-        }
 
         for ( String command : commands )
         {
