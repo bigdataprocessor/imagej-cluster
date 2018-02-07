@@ -1,7 +1,6 @@
 package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
-import embl.cba.logging.Logger;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
 import java.io.IOException;

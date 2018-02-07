@@ -1,5 +1,6 @@
 import de.embl.cba.cluster.ssh.SSHConnector;
 import de.embl.cba.cluster.ssh.SSHConnectorConfig;
+
 import ij.IJ;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;

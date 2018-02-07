@@ -156,7 +156,6 @@
             <artifactId>scijava-plugins-commands</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
@@ -166,11 +165,8 @@
 		<dependency>
 			<groupId>com.github.ssgpers</groupId>
 			<artifactId>java-utils--embl-cba</artifactId>
-            <version>38315bceac840445b6bc1b907cb58839c0ca75c1</version>
-
-            <!-- <version>38315bceac840445b6bc1b907cb58839c0ca75c1</version> -->
+            <version>master-SNAPSHOT</version>
 		</dependency>
-
 
 	</dependencies>
 
