@@ -67,13 +67,17 @@ public class JobFuture implements Future
 
         while ( ! executorService.isDone( jobID ) )
         {
-            Thread.sleep( 500 );
+            Utils.logger.info( "Job " + jobID + " is not done yet...." );
+            Thread.sleep( 10000 );
         }
+
+        Utils.logger.info( "Job " + jobID + " has finished!" );
 
         results.put( STD_OUT, executorService.getJobOutput( jobID ) );
 
         return results;
     }
+
 
     public Object get( long timeout, TimeUnit unit ) throws InterruptedException, ExecutionException, TimeoutException
     {

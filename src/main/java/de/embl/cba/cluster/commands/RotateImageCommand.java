@@ -70,6 +70,10 @@ public class RotateImageCommand implements Command
 
         if ( quitAfterRun ) Commands.quitImageJ( logService );
 
+        logService.info( "Done in command." );
+
+        return;
+
     }
 
 

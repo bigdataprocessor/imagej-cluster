@@ -94,12 +94,12 @@ public class ImageJCommandsSubmitter
 
     private JobFuture submitJobScript( JobScript jobScript )
     {
-        SSHExecutorService executorService = configureExecutorService();
+        SSHExecutorService executorService = getSSHExecutorService();
 
         return executorService.submit( jobScript );
     }
 
-    private SSHExecutorService configureExecutorService()
+    private SSHExecutorService getSSHExecutorService()
     {
         String hostname = "";
         String jobSubmissionType = "";

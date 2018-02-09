@@ -66,10 +66,15 @@ public class RotateImageDemo implements Command
             //
             // run with current ij
             //
+            /*
+            logService.setLevel( LogLevel.DEBUG );
 
             Future ij2Future = commandService.run( RotateImageCommand.class, false, parameters );
-            ij2Future.get(); // TODO: It does not return...
+            Object object = ij2Future.get(); // TODO: It does not return...
 
+
+            logService.info(" Done in main. " );
+            */
 
             //
             // run on this computer with other imagej instance
@@ -88,7 +93,6 @@ public class RotateImageDemo implements Command
             // run on EMBL Slurm cluster
             //
 
-            /*
 
             Future< HashMap< String, Object > > future;
             HashMap< String, Object> results;
@@ -102,7 +106,6 @@ public class RotateImageDemo implements Command
             future = submitOnEmblSlurm( RotateImageCommand.PLUGIN_NAME, parameters );
             results = future.get();
             IJ.log( (String) results.get( JobFuture.STD_OUT ) );
-            */
 
 
 

@@ -54,6 +54,7 @@ public class SSHExecutorService implements ExecutorService
                                String jobSubmissionType )
     {
         this.sshConnector = sshConnector;
+
         this.jobDirectory = jobDirectory;
         this.jobSubmissionType = jobSubmissionType;
 
@@ -232,7 +233,7 @@ public class SSHExecutorService implements ExecutorService
     {
         String jobText = jobScript.getJobText( this );
         sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, jobDirectory, getJobFilename( jobID ) );
-        sshConnector.executeCommand( makeScriptExecutableCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID ) );
+        //sshConnector.executeCommand( makeScriptExecutableCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID ) );
     }
 
     private void setJobID()

@@ -18,13 +18,16 @@ public class SSHConnector
 {
     private SSHConnectorConfig loginSettings;
 
-    private ChannelExec channelExec;
     private Session session;
+    private ChannelSftp channelSftp;
+    private ChannelExec channelExec;
+
     private ArrayList< String > systemOut;
     private ArrayList< String > systemErr;
 
     public static final String OUTPUT = "out";
     public static final String ERROR = "err";
+
 
     public SSHConnector( SSHConnectorConfig loginSettings )
     {
@@ -38,7 +41,7 @@ public class SSHConnector
 
     private boolean connectSession()
     {
-        //Utils.logger.info( "Establishing SSH connection to " + loginSettings.getHost() + "...");
+        Utils.logger.info( "Establishing SSH connection to " + loginSettings.getHost() + "...");
 
         JSch jsch = new JSch();
         try
@@ -55,7 +58,51 @@ public class SSHConnector
                    "Probably username and/or password were not correct." );
            return false;
         }
-        //Utils.logger.done();
+
+    }
+
+    private void connectChannelExec()
+    {
+
+        if ( session == null )
+        {
+            connectSession();
+        }
+
+        if ( channelExec == null || channelExec.isClosed() )
+        {
+            try
+            {
+                channelExec = ( ChannelExec ) session.openChannel( "exec" );
+            }
+            catch ( JSchException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void connectChannelSftp()
+    {
+        if ( session == null )
+        {
+            connectSession();
+        }
+
+        if ( channelSftp == null )
+        {
+            try
+            {
+                Utils.logger.info( "Establishing SFTP connection to " + loginSettings.getHost() + "...");
+                channelSftp = ( ChannelSftp ) session.openChannel( "sftp" );
+                channelSftp.connect();
+            }
+            catch ( JSchException e )
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -70,34 +117,37 @@ public class SSHConnector
     {
         Utils.logger.info( "# Executing remote command: " + command );
 
-        if ( ! connectSession() ) return null;
+        if ( session == null )
+        {
+            connectSession();
+        }
 
-        execute( command );
-        HashMap< String, ArrayList<String> > systemResponse = recordSystemResponseText();
+        connectChannelExec();
+        channelExec.setCommand( command );
 
-        disconnect();
+        HashMap< String, ArrayList<String> > systemResponse = recordSystemResponses();
+        //HashMap< String, ArrayList<String> > systemResponse = null;
+
+        // TODO: maybe wait there? or do not disconnect??
+        channelExec.disconnect();
 
         return systemResponse;
     }
 
-    private void disconnect()
-    {
-        channelExec.disconnect();
-        session.disconnect();
-    }
 
-    private HashMap< String, ArrayList<String> > recordSystemResponseText()
+    private HashMap< String, ArrayList<String> > recordSystemResponses()
     {
-        InputStream out = null;
+
         try
         {
-            out = channelExec.getInputStream();
+
+            InputStream out = channelExec.getInputStream();
             InputStream err = channelExec.getErrStream();
 
-            channelExec.connect();
+            channelExec.connect(); // this appears to be necessary at exactly this position to collect both out and err
 
-            String output = asString( out );
-            String error = asString( err );
+            String output = asString( out, channelExec );
+            String error = asString( err, channelExec );
 
             systemOut = asListOfLines( output );
             systemErr = asListOfLines( error );
@@ -105,14 +155,16 @@ public class SSHConnector
             HashMap< String, ArrayList<String> > systemResponses = new HashMap<>();
             systemResponses.put( OUTPUT, systemOut );
             systemResponses.put( ERROR, systemErr );
+
+            channelExec.disconnect();
+
             return systemResponses;
 
         }
         catch ( IOException e )
         {
             e.printStackTrace();
-        }
-        catch ( JSchException e )
+        } catch ( JSchException e )
         {
             e.printStackTrace();
         }
@@ -138,44 +190,23 @@ public class SSHConnector
 
     }
 
-    private void execute( String command )
-    {
-        try
-        {
-            channelExec = ( ChannelExec ) session.openChannel( "exec" );
-            channelExec.setCommand( command );
-        }
-        catch ( JSchException e )
-        {
-            e.printStackTrace();
-        }
-
-    }
-
     public boolean fileExists( String path )
     {
 
         Vector result = null;
-        ChannelSftp channelSftp = null;
 
-        try {
-            channelSftp = createSftpChannel();
+        try
+        {
+            connectChannelSftp();
             result = channelSftp.ls( path );
         }
-        catch (SftpException e) {
+        catch ( SftpException e )
+        {
             if (e.id == SSH_FX_NO_SUCH_FILE)
             {
-                channelSftp.disconnect();
                 return false;
             }
         }
-        catch ( JSchException e )
-        {
-            e.printStackTrace();
-            return false;
-        }
-
-        channelSftp.disconnect();
 
         return result != null && !result.isEmpty();
     }
@@ -191,15 +222,10 @@ public class SSHConnector
             Utils.logger.info( "Text: " );
             Utils.logger.info( text );
 
-            ChannelSftp channelSftp = createSftpChannel();
+            connectChannelSftp();
             channelSftp.cd( directory );
             channelSftp.put( asInputStream( text ), filename );
-            channelSftp.disconnect();
 
-        }
-        catch ( JSchException e )
-        {
-            e.printStackTrace();
         }
         catch ( SftpException e )
         {
@@ -221,16 +247,10 @@ public class SSHConnector
             Utils.logger.info( "Original path: " + oldPath );
             Utils.logger.info( "New path: " + newPath );
 
-            ChannelSftp channelSftp = createSftpChannel();
+            connectChannelSftp();
 
             channelSftp.rename( oldPath, newPath  );
 
-            channelSftp.disconnect();
-
-        }
-        catch ( JSchException e )
-        {
-            Utils.logger.error( e.toString() );
         }
         catch ( SftpException e )
         {
@@ -238,15 +258,10 @@ public class SSHConnector
         }
     }
 
-    private ChannelSftp createSftpChannel() throws JSchException
-    {
-        if ( ! connectSession() ) return null;
 
-        ChannelSftp channelSftp = (ChannelSftp) session.openChannel("sftp");
-        channelSftp.connect();
 
-        return channelSftp;
-    }
+
+
 
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
@@ -255,20 +270,14 @@ public class SSHConnector
 
         try
         {
-            ChannelSftp channelSftp = createSftpChannel();
+            connectChannelSftp();
 
             channelSftp.cd( remoteDirectory );
             InputStream inputStream = channelSftp.get( remoteFileName );
-            String text = asString( inputStream );
-
-            channelSftp.disconnect();
+            String text = asString( inputStream, channelSftp );
 
             return text;
 
-        }
-        catch ( JSchException e )
-        {
-            Utils.logger.error( e.toString() );
         }
         catch ( IOException e )
         {
@@ -289,27 +298,68 @@ public class SSHConnector
         return new ByteArrayInputStream( text.getBytes( StandardCharsets.UTF_8.name() ) );
     }
 
-    private static String asString( InputStream is ) throws IOException
+    private static String asString( InputStream in, Channel channel ) throws IOException
     {
 
-        if (is != null) {
-            Writer writer = new StringWriter();
+        // TODO: fix this
 
-            char[] buffer = new char[1024];
-            try {
-                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
+        byte[] tmp=new byte[1024];
+        while(true){
+            while(in.available()>0){
+                int i=in.read(tmp, 0, 1024);
+                if(i<0)break;
+                System.out.print(new String(tmp, 0, i));
+            }
+            if(channel.isClosed()){
+                if(in.available()>0) continue;
+                System.out.println("exit-status: "+channel.getExitStatus());
+                break;
+            }
+            try{Thread.sleep(1000);}catch(Exception ee){}
+        }
+
+
+        /*
+
+        if (in != null)
+        {
+
+            //Writer writer = new StringWriter();
+
+            //char[] buffer = new char[1024];
+            //Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+
+            while(true)
+            {
+                while ((n = reader.read(buffer)) != -1)
+                {
                     writer.write(buffer, 0, n);
                 }
-            } finally {
-                is.close();
+
+                if ( n == -1 ) break;
+
+                if( channel.isClosed() )
+                {
+                    if( in.available()>0 ) continue;
+                    break;
+                }
+
+                try{ Thread.sleep(1000); } catch( Exception ee ){}
+
             }
+
+            in.close();
+
             return writer.toString();
         }
-        else {
+        else
+        {
             return "";
         }
+        */
+
+        return "";
     }
 
 }
