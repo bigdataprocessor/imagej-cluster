@@ -30,6 +30,7 @@ public class ImageJCommandsSubmitter
 
     private ArrayList< String > linuxCommands;
     private ArrayList< String > ijCommandsWithParameters;
+    private SSHExecutorService sshExecutorService;
 
     public ImageJCommandsSubmitter( String executionSystem, String remoteJobDirectory, String remoteImageJExectuable, String username, String password )
     {
@@ -101,24 +102,30 @@ public class ImageJCommandsSubmitter
 
     private SSHExecutorService getSSHExecutorService()
     {
-        String hostname = "";
-        String jobSubmissionType = "";
 
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        if ( sshExecutorService == null )
         {
-            hostname = SSHConnectorConfig.EMBL_SLURM_HOST;
-            jobSubmissionType = SSHExecutorService.SLURM_JOB;
+            String hostname = "";
+            String jobSubmissionType = "";
 
-        }
-        else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )
-        {
-            hostname = SSHConnectorConfig.LOCALHOST;
-            jobSubmissionType = SSHExecutorService.LINUX_JOB;
+            if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+            {
+                hostname = SSHConnectorConfig.EMBL_SLURM_HOST;
+                jobSubmissionType = SSHExecutorService.SLURM_JOB;
+
+            } else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )
+            {
+                hostname = SSHConnectorConfig.LOCALHOST;
+                jobSubmissionType = SSHExecutorService.LINUX_JOB;
+            }
+
+            SSHConnectorConfig sshConnectorConfig = new SSHConnectorConfig( username, password, hostname );
+            SSHConnector sshConnector = new SSHConnector( sshConnectorConfig );
+
+            sshExecutorService = new SSHExecutorService( sshConnector, remoteJobDirectory, jobSubmissionType );
         }
 
-        SSHConnectorConfig sshConnectorConfig = new SSHConnectorConfig( username, password, hostname);
-        SSHConnector sshConnector = new SSHConnector( sshConnectorConfig );
-        return new SSHExecutorService( sshConnector, remoteJobDirectory, jobSubmissionType );
+        return sshExecutorService;
     }
 
     private JobScript createJobScript( ArrayList< String > completeCommands )

@@ -257,12 +257,7 @@ public class SSHConnector
             Utils.logger.error( e.toString() );
         }
     }
-
-
-
-
-
-
+    
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
     {
@@ -303,6 +298,7 @@ public class SSHConnector
 
         // TODO: fix this
 
+        /*
         byte[] tmp=new byte[1024];
         while(true){
             while(in.available()>0){
@@ -317,22 +313,22 @@ public class SSHConnector
             }
             try{Thread.sleep(1000);}catch(Exception ee){}
         }
+        */
 
 
-        /*
 
         if (in != null)
         {
 
-            //Writer writer = new StringWriter();
+            Writer writer = new StringWriter();
 
-            //char[] buffer = new char[1024];
-            //Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            char[] buffer = new char[1024];
+            Reader reader = new BufferedReader( new InputStreamReader( in, "UTF-8") );
             int n;
 
             while(true)
             {
-                while ((n = reader.read(buffer)) != -1)
+                while ( ( n = reader.read(buffer) ) != -1)
                 {
                     writer.write(buffer, 0, n);
                 }
@@ -341,7 +337,7 @@ public class SSHConnector
 
                 if( channel.isClosed() )
                 {
-                    if( in.available()>0 ) continue;
+                    if( in.available() > 0 ) continue;
                     break;
                 }
 
@@ -357,9 +353,7 @@ public class SSHConnector
         {
             return "";
         }
-        */
 
-        return "";
     }
 
 }
