@@ -42,8 +42,8 @@ public class ImageJCommandsSubmitter
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            commands.add( 0 , "module load Java" );
-            commands.add( 0 , "module load X11" );
+            commands.add( "module load Java" );
+            commands.add( "module load X11" );
         }
     }
 
