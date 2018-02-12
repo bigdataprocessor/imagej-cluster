@@ -1,5 +1,6 @@
 import de.embl.cba.cluster.ImageJCommandsSubmitter;
 import de.embl.cba.cluster.JobFuture;
+import de.embl.cba.cluster.SlurmQueue;
 import de.embl.cba.cluster.commands.RotateImageCommand;
 import ij.IJ;
 import net.imagej.DatasetService;
@@ -132,7 +133,7 @@ public class RotateImageDemo implements Command
                         "tischer", password );
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
-        future = commandsSubmitter.submitCommands();
+        future = commandsSubmitter.submitCommands( 16000, 4, SlurmQueue.DEFAULT_QUEUE );
         return future;
     }
 
@@ -147,7 +148,7 @@ public class RotateImageDemo implements Command
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
 
-        return commandsSubmitter.submitCommands();
+        return commandsSubmitter.submitCommands( 16000, 4, SlurmQueue.DEFAULT_QUEUE);
     }
 
 

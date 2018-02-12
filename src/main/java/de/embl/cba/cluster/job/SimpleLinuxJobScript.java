@@ -1,7 +1,6 @@
 package de.embl.cba.cluster.job;
 
 import de.embl.cba.cluster.SSHExecutorService;
-import de.embl.cba.cluster.SlurmQueues;
 
 import java.util.ArrayList;
 

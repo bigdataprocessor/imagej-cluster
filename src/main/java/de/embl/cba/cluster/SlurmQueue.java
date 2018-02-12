@@ -1,6 +1,6 @@
 package de.embl.cba.cluster;
 
-public abstract class SlurmQueues
+public abstract class SlurmQueue
 {
     public static final String DEFAULT_QUEUE = "htc";
     public static final String BIGMEM_QUEUE = "bigmem";

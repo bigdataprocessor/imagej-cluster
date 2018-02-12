@@ -62,7 +62,7 @@ public class ImageJCommandsSubmitter
     }
 
 
-    public JobFuture submitCommands( )
+    public JobFuture submitCommands( int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
 
         ArrayList< String > ijBinaryAndCommandAndParameters = prependIJBinary( ijCommandsWithParameters );
@@ -85,7 +85,7 @@ public class ImageJCommandsSubmitter
             allCommands.add( ijCommand );
         }
 
-        JobScript jobScript = createJobScript( allCommands );
+        JobScript jobScript = createJobScript( allCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
 
         JobFuture future = submitJobScript( jobScript );
 
@@ -128,11 +128,11 @@ public class ImageJCommandsSubmitter
         return sshExecutorService;
     }
 
-    private JobScript createJobScript( ArrayList< String > completeCommands )
+    private JobScript createJobScript( ArrayList< String > completeCommands, int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue  )
     {
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            JobScript jobScript = new SlurmJobScript( completeCommands );
+            JobScript jobScript = new SlurmJobScript( completeCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue );
             return jobScript;
         }
         else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )

@@ -1,7 +1,7 @@
 package de.embl.cba.cluster.job;
 
 import de.embl.cba.cluster.SSHExecutorService;
-import de.embl.cba.cluster.SlurmQueues;
+import de.embl.cba.cluster.SlurmQueue;
 
 import java.util.ArrayList;
 
@@ -18,13 +18,12 @@ public class SlurmJobScript implements JobScript
 
     private ArrayList< String > executableCommands;
 
-    public SlurmJobScript( ArrayList< String > executableCommands )
+    public SlurmJobScript( ArrayList< String > executableCommands, int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
         this.executableCommands = executableCommands;
-
-        memoryPerJobInMegaByte = 16000;
-        numWorkersPerNode = 4;
-        queue = SlurmQueues.DEFAULT_QUEUE;
+        this.memoryPerJobInMegaByte = 16000;
+        this.numWorkersPerNode = 4;
+        this.queue = slurmQueue;
     }
 
     public String getJobText( SSHExecutorService SSHExecutorService )
