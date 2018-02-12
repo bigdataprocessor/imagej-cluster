@@ -38,13 +38,9 @@ public class ImageJCommandsSubmitter
         this.username = username;
         this.password = password;
         this.remoteJobDirectory = remoteJobDirectory;
+
         commands = new ArrayList<>();
 
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
-        {
-            commands.add( "module load Java" );
-            commands.add( "module load X11" );
-        }
     }
 
 
@@ -68,6 +64,12 @@ public class ImageJCommandsSubmitter
 
     public JobFuture submitCommands( int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
+
+        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        {
+            commands.add(0, "module load Java" );
+            commands.add(0, "module load X11" );
+        }
 
         JobScript jobScript = createJobScript( commands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
 
