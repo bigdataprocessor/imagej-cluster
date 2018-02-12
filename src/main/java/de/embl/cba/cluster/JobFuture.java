@@ -34,6 +34,11 @@ public class JobFuture implements Future
         return false;
     }
 
+    public long getJobID()
+    {
+        return jobID;
+    }
+
     public boolean isStarted()
     {
         if ( executorService.isStarted( jobID ) )

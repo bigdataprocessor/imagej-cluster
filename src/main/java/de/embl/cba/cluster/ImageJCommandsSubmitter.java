@@ -28,8 +28,7 @@ public class ImageJCommandsSubmitter
     private String password;
     private String remoteJobDirectory;
 
-    private ArrayList< String > linuxCommands;
-    private ArrayList< String > ijCommandsWithParameters;
+    private ArrayList< String > commands;
     private SSHExecutorService sshExecutorService;
 
     public ImageJCommandsSubmitter( String executionSystem, String remoteJobDirectory, String remoteImageJExectuable, String username, String password )
@@ -39,53 +38,38 @@ public class ImageJCommandsSubmitter
         this.username = username;
         this.password = password;
         this.remoteJobDirectory = remoteJobDirectory;
-        ijCommandsWithParameters = new ArrayList<>();
-        linuxCommands = new ArrayList<>();
+        commands = new ArrayList<>();
+
+        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        {
+            commands.add( 0 , "module load Java" );
+            commands.add( 0 , "module load X11" );
+        }
     }
 
 
     public void clearCommands()
     {
-        ijCommandsWithParameters.clear();
-        linuxCommands.clear();
+        commands.clear();
     }
 
     public void addIJCommandWithParameters( String command, Map<String, Object> parameters )
     {
-        String commandWithParameters = Commands.createCommandAndParameterString( command, parameters );
-        ijCommandsWithParameters.add( commandWithParameters );
+        String commandAndParameters = Commands.createCommandAndParameterString( command, parameters );
+        String ijBinaryAndCommandAndParameters = prependIJBinary( commandAndParameters );
+        commands.add( ijBinaryAndCommandAndParameters );
     }
 
     public void addLinuxCommand( String command )
     {
-        linuxCommands.add( command );
+        commands.add( command );
     }
 
 
     public JobFuture submitCommands( int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
 
-        ArrayList< String > ijBinaryAndCommandAndParameters = prependIJBinary( ijCommandsWithParameters );
-
-        ArrayList< String > allCommands = new ArrayList<>();
-
-        for ( String linuxCommand : linuxCommands )
-        {
-            allCommands.add( linuxCommand );
-        }
-
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
-        {
-            allCommands.add( 0 , "module load Java" );
-            allCommands.add( 0 , "module load X11" );
-        }
-
-        for ( String ijCommand : ijBinaryAndCommandAndParameters )
-        {
-            allCommands.add( ijCommand );
-        }
-
-        JobScript jobScript = createJobScript( allCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
+        JobScript jobScript = createJobScript( commands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
 
         JobFuture future = submitJobScript( jobScript );
 
@@ -146,17 +130,9 @@ public class ImageJCommandsSubmitter
         }
     }
 
-    private  ArrayList< String > prependIJBinary( ArrayList< String > commands )
+    private String prependIJBinary( String command )
     {
-        ArrayList< String > completeCommands = new ArrayList<>(  );
-
-        for ( String command : commands )
-        {
-            completeCommands.add( remoteImageJExectuable + " " + command );
-        }
-
-        return completeCommands;
-
+        return remoteImageJExectuable + " " + command ;
     }
 
 }
