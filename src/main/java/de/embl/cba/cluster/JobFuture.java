@@ -34,16 +34,14 @@ public class JobFuture implements Future
         return false;
     }
 
-    public boolean isRunning()
+    public boolean isStarted()
     {
-        if ( executorService.isStarted( jobID ) && ! executorService.isDone( jobID ) )
+        if ( executorService.isStarted( jobID ) )
         {
-            Utils.logger.info( "Job " + jobID + " is running." );
             return true;
         }
         else
         {
-            Utils.logger.info( "Job " + jobID + " has not started yet." );
             return false;
         }
     }
@@ -60,7 +58,6 @@ public class JobFuture implements Future
 
     public String getOutput()
     {
-        Utils.logger.info( "Fetching " + jobID + "'s current output..." );
         return executorService.getJobOutput( jobID );
     }
 
@@ -70,11 +67,8 @@ public class JobFuture implements Future
 
         while ( ! executorService.isDone( jobID ) )
         {
-            Utils.logger.info( "Job " + jobID + " is not done yet." );
             Thread.sleep( 10000 );
         }
-
-        Utils.logger.info( "Job " + jobID + " has finished." );
 
         results.put( STD_OUT, executorService.getJobOutput( jobID ) );
 
