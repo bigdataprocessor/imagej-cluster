@@ -15,10 +15,10 @@ public class ImageJCommandsSubmitter
     public static final String EXECUTION_SYSTEM_EMBL_SLURM = "EMBL Slurm Cluster";
     public static final String EXECUTION_SYSTEM_MAC_OS_LOCALHOST = "MacOS localhost";
 
-    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a /g/almf/software/Fiji.app/ImageJ-linux64 --run";
-    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run";
-    public static final String IMAGEJ_EXECUTABLE_CBA_CLUSTER_XVFB = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --run";
-    public static final String IMAGEJ_EXECUTABLE_MAC_OS = "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --run";
+    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a /g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --run";
+    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --ij2 --headless --run";
+    public static final String IMAGEJ_EXECUTABLE_CBA_CLUSTER_XVFB = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --run";
+    public static final String IMAGEJ_EXECUTABLE_MAC_OS = "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --mem=MEMORY_MB --run";
 
 
     private String executionSystem;
@@ -65,13 +65,21 @@ public class ImageJCommandsSubmitter
     public JobFuture submitCommands( int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
 
+        ArrayList< String > finalCommands = new ArrayList<>();
+
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            commands.add(0, "module load Java" );
-            commands.add(0, "module load X11" );
+            finalCommands.add( "module load Java" );
+            finalCommands.add( "module load X11" );
         }
 
-        JobScript jobScript = createJobScript( commands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
+        for ( String command : commands )
+        {
+            String finalCommand = command.replace( "MEMORY_MB", ""+memoryPerJobInMegaByte+"M" );
+            finalCommands.add( finalCommand );
+        }
+
+        JobScript jobScript = createJobScript( finalCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
 
         JobFuture future = submitJobScript( jobScript );
 
