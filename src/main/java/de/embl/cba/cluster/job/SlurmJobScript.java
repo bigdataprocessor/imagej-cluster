@@ -21,8 +21,8 @@ public class SlurmJobScript implements JobScript
     public SlurmJobScript( ArrayList< String > executableCommands, int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
     {
         this.executableCommands = executableCommands;
-        this.memoryPerJobInMegaByte = 16000;
-        this.numWorkersPerNode = 4;
+        this.memoryPerJobInMegaByte = memoryPerJobInMegaByte;
+        this.numWorkersPerNode = numWorkersPerNode;
         this.queue = slurmQueue;
     }
 
