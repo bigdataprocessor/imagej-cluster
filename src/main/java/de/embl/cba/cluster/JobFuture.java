@@ -18,6 +18,9 @@ public class JobFuture implements Future
 
     public static final String STD_OUT = "StdOut";
     public static final String STD_ERR = "StdErr";
+    public static final String NO_EVERYTHING_FINE = "No resubmission needed everything seems fine!";
+    public static final String XVFB_ERROR = "Xvfb error: /usr/bin/xvfb-run: ...";
+
 
 
     public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
@@ -61,16 +64,16 @@ public class JobFuture implements Future
         return executorService.isDone( jobID );
     }
 
-    public boolean needsResubmission()
+    public String needsResubmission()
     {
         String err = executorService.getJobError( jobID );
 
         if ( err.contains( "/usr/bin/xvfb-run" ) )
         {
-            return true;
+            return XVFB_ERROR;
         }
 
-        return false;
+        return NO_EVERYTHING_FINE;
     }
 
     public void resubmit()
