@@ -174,8 +174,7 @@ public class SSHConnector
 
     public String remoteFileSeparator()
     {
-        // TODO
-        return File.separator;
+        return "/";
     }
 
     private ArrayList< String > asListOfLines( String output )

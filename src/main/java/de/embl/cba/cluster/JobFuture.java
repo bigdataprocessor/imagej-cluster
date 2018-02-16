@@ -1,5 +1,8 @@
 package de.embl.cba.cluster;
 
+import de.embl.cba.cluster.job.JobScript;
+
+import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
@@ -11,15 +14,17 @@ public class JobFuture implements Future
 {
     SSHExecutorService executorService;
     long jobID;
+    JobScript jobScript;
 
     public static final String STD_OUT = "StdOut";
     public static final String STD_ERR = "StdErr";
 
 
-    public JobFuture( SSHExecutorService executorService, long jobID )
+    public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
     {
         this.executorService = executorService;
         this.jobID = jobID;
+        this.jobScript = jobScript;
     }
 
     public boolean cancel( boolean mayInterruptIfRunning )
@@ -56,6 +61,24 @@ public class JobFuture implements Future
         return executorService.isDone( jobID );
     }
 
+    public boolean needsResubmission()
+    {
+        String err = executorService.getJobError( jobID );
+
+        if ( err.contains( "/usr/bin/xvfb-run" ) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void resubmit()
+    {
+        executorService.submit( jobScript, jobID );
+    }
+
+
     public String getError()
     {
         return executorService.getJobError( jobID );
@@ -65,6 +88,8 @@ public class JobFuture implements Future
     {
         return executorService.getJobOutput( jobID );
     }
+
+
 
     public HashMap< String, Object > get() throws InterruptedException, ExecutionException
     {

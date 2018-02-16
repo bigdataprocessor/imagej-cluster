@@ -109,9 +109,17 @@ public class SSHExecutorService implements ExecutorService
     {
         this.jobScript = jobScript;
 
-        ensureExistenceOfRemoteJobDirectory();
-
         setJobID();
+
+        return submit( jobScript, jobID );
+    }
+
+
+    public synchronized JobFuture submit( JobScript jobScript, long jobID )
+    {
+        this.jobScript = jobScript;
+
+        ensureExistenceOfRemoteJobDirectory();
 
         createRemoteJobFile();
 
@@ -120,9 +128,11 @@ public class SSHExecutorService implements ExecutorService
         return createJobFuture();
     }
 
+
+
     private JobFuture createJobFuture( )
     {
-        JobFuture jobFuture = new JobFuture( this, jobID );
+        JobFuture jobFuture = new JobFuture( this, jobID, jobScript );
 
         return jobFuture;
     }

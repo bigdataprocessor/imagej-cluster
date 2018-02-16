@@ -69,6 +69,10 @@ public class ImageJCommandsSubmitter
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
+            finalCommands.add( "hostname" );
+            finalCommands.add( "lscpu" );
+            finalCommands.add( "free -m" );
+            finalCommands.add( "START_TIME=$SECONDS" );
             finalCommands.add( "module load Java" );
             finalCommands.add( "module load X11" );
         }
@@ -77,6 +81,13 @@ public class ImageJCommandsSubmitter
         {
             String finalCommand = command.replace( "MEMORY_MB", ""+memoryPerJobInMegaByte+"M" );
             finalCommands.add( finalCommand );
+        }
+
+        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        {
+            finalCommands.add( "ELAPSED_TIME=$(($SECONDS - $START_TIME))" );
+            finalCommands.add( "echo \"Elapsed time [s]:\"" );
+            finalCommands.add( "echo $ELAPSED_TIME" );
         }
 
         JobScript jobScript = createJobScript( finalCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
