@@ -15,7 +15,7 @@ public class ImageJCommandsSubmitter
     public static final String EXECUTION_SYSTEM_EMBL_SLURM = "EMBL Slurm Cluster";
     public static final String EXECUTION_SYSTEM_MAC_OS_LOCALHOST = "MacOS localhost";
 
-    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a /g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --run";
+    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a -e XVFB_ERR_PATH /g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --run";
     public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --ij2 --headless --run";
     public static final String IMAGEJ_EXECUTABLE_CBA_CLUSTER_XVFB = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --run";
     public static final String IMAGEJ_EXECUTABLE_MAC_OS = "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --mem=MEMORY_MB --run";

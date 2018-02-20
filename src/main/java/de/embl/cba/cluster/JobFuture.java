@@ -22,7 +22,6 @@ public class JobFuture implements Future
     public static final String XVFB_ERROR = "Xvfb error: /usr/bin/xvfb-run: ...";
 
 
-
     public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
     {
         this.executorService = executorService;

@@ -33,6 +33,8 @@ public class SSHExecutorService implements ExecutorService
 
     public static final String OUTPUT = ".out";
     public static final String ERROR = ".err";
+    public static final String XVFB_ERROR = ".xvfb.err";
+
     public static final String STARTED = ".started";
     public static final String FINISHED = ".finished";
     public static final String JOB = ".job";
@@ -257,6 +259,11 @@ public class SSHExecutorService implements ExecutorService
         return jobDirectory;
     }
 
+    public String getCurrentXvfbErrPath()
+    {
+        return getJobXvfbErrPath( jobID );
+    }
+
     public String getCurrentJobOutPath()
     {
         return getJobOutPath( jobID );
@@ -266,6 +273,13 @@ public class SSHExecutorService implements ExecutorService
     {
         return getJobErrPath( jobID );
     }
+
+
+    public String getJobXvfbErrPath( long jobID )
+    {
+        return jobDirectory + sshConnector.remoteFileSeparator() + getJobXvfbErrFilename( jobID  );
+    }
+
 
     public String getJobOutPath( long jobID )
     {
@@ -290,6 +304,11 @@ public class SSHExecutorService implements ExecutorService
         String command = createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
 
         return command;
+    }
+
+    public String getJobXvfbErrFilename( long jobID  )
+    {
+        return jobID + XVFB_ERROR ;
     }
 
     public String getJobOutFilename( long jobID  )

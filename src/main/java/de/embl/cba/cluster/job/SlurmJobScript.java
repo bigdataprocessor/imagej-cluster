@@ -15,6 +15,7 @@ public class SlurmJobScript implements JobScript
     public long memoryPerJobInMegaByte;
     public long numWorkersPerNode;
     public String queue;
+    public static final String XVFB_ERR_PATH = "XVFB_ERR_PATH";
 
     private ArrayList< String > executableCommands;
 
@@ -26,25 +27,32 @@ public class SlurmJobScript implements JobScript
         this.queue = slurmQueue;
     }
 
-    public String getJobText( SSHExecutorService SSHExecutorService )
+    public String getJobText( SSHExecutorService sshExecutorService )
     {
 
         ArrayList < String > lines = new ArrayList< >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + SSHExecutorService.getCurrentJobErrPath() );
-        lines.add( "#SBATCH -o " + SSHExecutorService.getCurrentJobOutPath() );
+        lines.add( "#SBATCH -e " + sshExecutorService.getCurrentJobErrPath() );
+        lines.add( "#SBATCH -o " + sshExecutorService.getCurrentJobOutPath() );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + numWorkersPerNode );
         lines.add( "#SBATCH --mem " + memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + queue );
         lines.add( "ulimit -c 0" );
 
-        lines.add( SSHExecutorService.getJobStartedCommand() );
+        lines.add( sshExecutorService.getJobStartedCommand() );
 
-        for ( String r : executableCommands ) lines.add ( r );
+        for ( String executableCommand : executableCommands )
+        {
+            if ( executableCommand.contains( XVFB_ERR_PATH  ) )
+            {
+                executableCommand = executableCommand.replace(  XVFB_ERR_PATH, sshExecutorService.getCurrentXvfbErrPath() );
+            }
+            lines.add( executableCommand );
+        }
 
-        lines.add( SSHExecutorService.getJobFinishedCommand() );
+        lines.add( sshExecutorService.getJobFinishedCommand() );
 
         return String.join( "\n", lines );
 
