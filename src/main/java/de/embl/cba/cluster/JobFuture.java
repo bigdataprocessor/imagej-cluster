@@ -2,8 +2,6 @@ package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
 
-import java.awt.*;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -18,7 +16,7 @@ public class JobFuture implements Future
 
     public static final String STD_OUT = "StdOut";
     public static final String STD_ERR = "StdErr";
-    public static final String NO_EVERYTHING_FINE = "No resubmission needed everything seems fine!";
+    public static final String EVERYTHING_FINE = "No resubmission needed everything seems fine!";
 
     public static final String XVFB_ERROR = "/usr/bin/xvfb-run";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
@@ -74,13 +72,16 @@ public class JobFuture implements Future
         {
             return XVFB_ERROR;
         }
-
-        if ( err.contains( SLURM_STEP_ERROR ) )
+        else if ( err.contains( SLURM_STEP_ERROR ) )
         {
             return SLURM_STEP_ERROR;
         }
+        else if ( err.length() > 10 )
+        {
+            return err;
+        }
 
-        return NO_EVERYTHING_FINE;
+        return EVERYTHING_FINE;
     }
 
     public void resubmit()
