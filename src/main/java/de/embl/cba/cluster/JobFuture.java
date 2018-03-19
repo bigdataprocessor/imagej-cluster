@@ -72,12 +72,12 @@ public class JobFuture implements Future
 
         if ( err.contains( XVFB_ERROR ) )
         {
-            return "xvfb_error";
+            return XVFB_ERROR;
         }
 
         if ( err.contains( SLURM_STEP_ERROR ) )
         {
-            return "slurm_step_error";
+            return SLURM_STEP_ERROR;
         }
 
         return NO_EVERYTHING_FINE;
