@@ -1,6 +1,6 @@
 import de.embl.cba.cluster.ImageJCommandsSubmitter;
 import de.embl.cba.cluster.JobFuture;
-import de.embl.cba.cluster.SlurmQueue;
+import de.embl.cba.cluster.JobSettings;
 import de.embl.cba.cluster.commands.RotateImageCommand;
 import ij.IJ;
 import net.imagej.DatasetService;
@@ -9,7 +9,6 @@ import net.imagej.ops.OpService;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
-import org.scijava.log.LogLevel;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -133,7 +132,7 @@ public class RotateImageDemo implements Command
                         "tischer", password );
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
-        future = commandsSubmitter.submitCommands( 16000, 4, SlurmQueue.DEFAULT_QUEUE );
+        future = commandsSubmitter.submitCommands( 16000, 4, JobSettings.DEFAULT_QUEUE );
         return future;
     }
 
@@ -148,7 +147,7 @@ public class RotateImageDemo implements Command
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
 
-        return commandsSubmitter.submitCommands( 16000, 4, SlurmQueue.DEFAULT_QUEUE);
+        return commandsSubmitter.submitCommands( 16000, 4, JobSettings.DEFAULT_QUEUE);
     }
 
 

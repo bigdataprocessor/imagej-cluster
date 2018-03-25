@@ -62,7 +62,7 @@ public class ImageJCommandsSubmitter
     }
 
 
-    public JobFuture submitCommands( int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue )
+    public JobFuture submitCommands( int memoryPerJobInMegaByte, JobSettings jobSettings )
     {
 
         ArrayList< String > finalCommands = new ArrayList<>();
@@ -79,7 +79,7 @@ public class ImageJCommandsSubmitter
 
         for ( String command : commands )
         {
-            String finalCommand = command.replace( "MEMORY_MB", ""+memoryPerJobInMegaByte+"M" );
+            String finalCommand = command.replace( "MEMORY_MB", "" + memoryPerJobInMegaByte + "M" );
             finalCommands.add( finalCommand );
         }
 
@@ -90,7 +90,7 @@ public class ImageJCommandsSubmitter
             finalCommands.add( "echo $ELAPSED_TIME" );
         }
 
-        JobScript jobScript = createJobScript( finalCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue);
+        JobScript jobScript = createJobScript( finalCommands, jobSettings );
 
         JobFuture future = submitJobScript( jobScript );
 
@@ -133,11 +133,11 @@ public class ImageJCommandsSubmitter
         return sshExecutorService;
     }
 
-    private JobScript createJobScript( ArrayList< String > completeCommands, int memoryPerJobInMegaByte, int numWorkersPerNode, String slurmQueue  )
+    private JobScript createJobScript( ArrayList< String > completeCommands, JobSettings jobSettings  )
     {
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            JobScript jobScript = new SlurmJobScript( completeCommands, memoryPerJobInMegaByte, numWorkersPerNode, slurmQueue );
+            JobScript jobScript = new SlurmJobScript( completeCommands, jobSettings );
             return jobScript;
         }
         else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )

@@ -41,8 +41,8 @@ public class ImageJGroovyScriptSlurmJob
 
     private void configureJobScript()
     {
-        slurmJobScript = new SlurmJobScript( null, 16000, 4, SlurmQueue.DEFAULT_QUEUE);
-        slurmJobScript.queue = SlurmQueue.DEFAULT_QUEUE;
+        slurmJobScript = new SlurmJobScript( null, 16000, 4, JobSettings.DEFAULT_QUEUE);
+        slurmJobScript.queue = JobSettings.DEFAULT_QUEUE;
         slurmJobScript.memoryPerJobInMegaByte = 10000;
         slurmJobScript.numWorkersPerNode = 4;
     }

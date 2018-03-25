@@ -19,8 +19,8 @@ public class JobFuture implements Future
     public static final String EVERYTHING_FINE = "No resubmission needed everything seems fine!";
 
     public static final String XVFB_ERROR = "/usr/bin/xvfb-run";
+    public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
-
 
 
     public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
@@ -71,6 +71,10 @@ public class JobFuture implements Future
         if ( err.contains( XVFB_ERROR ) )
         {
             return XVFB_ERROR;
+        }
+        else if ( err.contains( SLURM_TIME_LIMIT_ERROR ) )
+        {
+            return SLURM_TIME_LIMIT_ERROR;
         }
         else if ( err.contains( SLURM_STEP_ERROR ) )
         {
