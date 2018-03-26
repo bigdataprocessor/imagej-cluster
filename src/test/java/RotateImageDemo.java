@@ -132,7 +132,13 @@ public class RotateImageDemo implements Command
                         "tischer", password );
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
-        future = commandsSubmitter.submitCommands( 16000, 4, JobSettings.DEFAULT_QUEUE );
+
+        JobSettings jobSettings = new JobSettings();
+        jobSettings.memoryPerJobInMegaByte = 16000;
+        jobSettings.numWorkersPerNode = 4;
+        jobSettings.queue = JobSettings.DEFAULT_QUEUE;
+        future = commandsSubmitter.submitCommands( jobSettings );
+
         return future;
     }
 
@@ -147,7 +153,11 @@ public class RotateImageDemo implements Command
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
 
-        return commandsSubmitter.submitCommands( 16000, 4, JobSettings.DEFAULT_QUEUE);
+        JobSettings jobSettings = new JobSettings();
+        jobSettings.memoryPerJobInMegaByte = 16000;
+        jobSettings.numWorkersPerNode = 4;
+        jobSettings.queue = JobSettings.DEFAULT_QUEUE;
+        return commandsSubmitter.submitCommands( jobSettings );
     }
 
 

@@ -36,9 +36,13 @@ public class SlurmJobScript implements JobScript
         lines.add( "#SBATCH --mem " + jobSettings.memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + jobSettings.queue );
         lines.add( "#SBATCH -t " + jobSettings.timePerJobInMinutes );
+
         lines.add( "ulimit -c 0" );
 
         lines.add( sshExecutorService.getJobStartedCommand() );
+
+        lines.add( "date" );
+        lines.add( "echo \"job started\"" );
 
         for ( String executableCommand : executableCommands )
         {
@@ -46,6 +50,9 @@ public class SlurmJobScript implements JobScript
             {
                 executableCommand = executableCommand.replace(  XVFB_ERR_PATH, sshExecutorService.getCurrentXvfbErrPath() );
             }
+
+            lines.add( "date" );
+            lines.add( "echo \"" + executableCommand + "\"" );
             lines.add( executableCommand );
         }
 

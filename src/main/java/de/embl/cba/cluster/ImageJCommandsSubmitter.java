@@ -62,7 +62,7 @@ public class ImageJCommandsSubmitter
     }
 
 
-    public JobFuture submitCommands( int memoryPerJobInMegaByte, JobSettings jobSettings )
+    public JobFuture submitCommands( JobSettings jobSettings )
     {
 
         ArrayList< String > finalCommands = new ArrayList<>();
@@ -79,7 +79,7 @@ public class ImageJCommandsSubmitter
 
         for ( String command : commands )
         {
-            String finalCommand = command.replace( "MEMORY_MB", "" + memoryPerJobInMegaByte + "M" );
+            String finalCommand = command.replace( "MEMORY_MB", "" + jobSettings.memoryPerJobInMegaByte + "M" );
             finalCommands.add( finalCommand );
         }
 

@@ -9,7 +9,6 @@
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.2.1</version>
 
-    <!--
     <build>
         <plugins>
             <plugin>
@@ -25,8 +24,6 @@
             </plugin>
         </plugins>
     </build>
-    -->
-
 
     <name>Fiji Slurm</name>
 	<description>Running Fiji on Slurm cluster</description>
