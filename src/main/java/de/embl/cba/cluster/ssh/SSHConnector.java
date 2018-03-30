@@ -216,10 +216,7 @@ public class SSHConnector
     {
         try
         {
-            Utils.logger.info( "# Saving text as remote file:");
-            Utils.logger.info( "Remote file path: " + directory + "/" + filename );
-            Utils.logger.info( "Text: " );
-            Utils.logger.info( text );
+            Utils.logger.info( "# Saving remote file:" + directory + "/" + filename );
 
             connectChannelSftp();
             channelSftp.cd( directory );

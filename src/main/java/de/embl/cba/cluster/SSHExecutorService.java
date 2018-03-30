@@ -18,7 +18,6 @@ public class SSHExecutorService implements ExecutorService
 {
     // input
     private final SSHConnector sshConnector;
-    private JobScript jobScript;
 
     public static final String SLURM_JOB = "Slurm";
     public static final String LINUX_JOB = "Linux";
@@ -40,8 +39,6 @@ public class SSHExecutorService implements ExecutorService
     public static final String JOB = ".job";
 
     private String jobDirectory;
-    private long jobID;
-
     private String jobSubmissionType;
 
     // Commands
@@ -109,9 +106,7 @@ public class SSHExecutorService implements ExecutorService
 
     public synchronized JobFuture submit( JobScript jobScript )
     {
-        this.jobScript = jobScript;
-
-        setJobID();
+        long jobID = getJobID();
 
         return submit( jobScript, jobID );
     }
@@ -119,20 +114,16 @@ public class SSHExecutorService implements ExecutorService
 
     public synchronized JobFuture submit( JobScript jobScript, long jobID )
     {
-        this.jobScript = jobScript;
+        ensureExistenceOfRemoteJobDirectory( );
 
-        ensureExistenceOfRemoteJobDirectory();
+        createRemoteJobFile( jobID, jobScript );
 
-        createRemoteJobFile();
+        submitJob( jobID );
 
-        submitJob();
-
-        return createJobFuture();
+        return createJobFuture( jobID, jobScript );
     }
 
-
-
-    private JobFuture createJobFuture( )
+    private JobFuture createJobFuture( long jobID, JobScript jobScript )
     {
         JobFuture jobFuture = new JobFuture( this, jobID, jobScript );
 
@@ -182,17 +173,17 @@ public class SSHExecutorService implements ExecutorService
     }
 
     public String getJobError( long jobID )
-        {
+    {
         return sshConnector.readRemoteTextFileUsingSFTP( jobDirectory, getJobErrFilename( jobID )  );
     }
 
-    private HashMap< String, ArrayList< String > > submitJob()
+    private HashMap< String, ArrayList< String > > submitJob( long jobID )
     {
-        HashMap< String, ArrayList< String > > responses = sshConnector.executeCommand( getJobSubmissionCommand() );
+        HashMap< String, ArrayList< String > > responses = sshConnector.executeCommand( getJobSubmissionCommand( jobID ) );
         return responses;
     }
 
-    private String getJobSubmissionCommand()
+    private String getJobSubmissionCommand( long jobID )
     {
         String jobSubmissionCommand = "";
 
@@ -213,12 +204,11 @@ public class SSHExecutorService implements ExecutorService
         }
         else if ( jobSubmissionType.equals( LINUX_JOB ) )
         {
-            jobSubmissionCommand += " > " + getCurrentJobOutPath() + " &";
+            jobSubmissionCommand += " > " + getJobOutPath( jobID ) + " &";
         }
 
         return jobSubmissionCommand;
     }
-
 
     public boolean isDone( long jobID )
     {
@@ -240,18 +230,18 @@ public class SSHExecutorService implements ExecutorService
         return jobID + STARTED;
     }
 
-
-    private void createRemoteJobFile( )
+    private void createRemoteJobFile( long jobID, JobScript jobScript )
     {
-        String jobText = jobScript.getJobText( this );
+        String jobText = jobScript.getJobText( this, jobID );
         sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, jobDirectory, getJobFilename( jobID ) );
         //sshConnector.executeCommand( makeScriptExecutableCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID ) );
     }
 
-    private void setJobID()
+    private long getJobID()
     {
         Random random = new Random();
-        jobID = random.nextLong() & Long.MAX_VALUE;
+        long jobID = random.nextLong() & Long.MAX_VALUE;
+        return jobID;
     }
 
     public String getJobDirectory()
@@ -259,27 +249,10 @@ public class SSHExecutorService implements ExecutorService
         return jobDirectory;
     }
 
-    public String getCurrentXvfbErrPath()
-    {
-        return getJobXvfbErrPath( jobID );
-    }
-
-    public String getCurrentJobOutPath()
-    {
-        return getJobOutPath( jobID );
-    }
-
-    public String getCurrentJobErrPath()
-    {
-        return getJobErrPath( jobID );
-    }
-
-
     public String getJobXvfbErrPath( long jobID )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobXvfbErrFilename( jobID  );
     }
-
 
     public String getJobOutPath( long jobID )
     {
@@ -291,19 +264,15 @@ public class SSHExecutorService implements ExecutorService
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobErrFilename( jobID  );
     }
 
-
-    public String getJobStartedCommand()
+    public String getJobStartedCommand( long jobID )
     {
-        String command = createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID );
-
-        return command;
+        return createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID );
     }
 
-    public String getJobFinishedCommand()
+    public String getJobFinishedCommand( long jobID )
     {
-        String command = createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
+        return createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
 
-        return command;
     }
 
     public String getJobXvfbErrFilename( long jobID  )

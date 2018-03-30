@@ -23,14 +23,14 @@ public class SlurmJobScript implements JobScript
         this.jobSettings = jobSettings;
     }
 
-    public String getJobText( SSHExecutorService sshExecutorService )
+    public String getJobText( SSHExecutorService sshExecutorService, long jobID )
     {
 
         ArrayList < String > lines = new ArrayList< >(  );
 
         lines.add( "#!/bin/bash" );
-        lines.add( "#SBATCH -e " + sshExecutorService.getCurrentJobErrPath() );
-        lines.add( "#SBATCH -o " + sshExecutorService.getCurrentJobOutPath() );
+        lines.add( "#SBATCH -e " + sshExecutorService.getJobErrPath( jobID ) );
+        lines.add( "#SBATCH -o " + sshExecutorService.getJobOutPath( jobID ) );
         lines.add( "#SBATCH -N 1" );
         lines.add( "#SBATCH -n " + jobSettings.numWorkersPerNode );
         lines.add( "#SBATCH --mem " + jobSettings.memoryPerJobInMegaByte );
@@ -39,7 +39,7 @@ public class SlurmJobScript implements JobScript
 
         lines.add( "ulimit -c 0" );
 
-        lines.add( sshExecutorService.getJobStartedCommand() );
+        lines.add( sshExecutorService.getJobStartedCommand( jobID ) );
 
         lines.add( "date" );
         lines.add( "echo \"job started\"" );
@@ -48,7 +48,7 @@ public class SlurmJobScript implements JobScript
         {
             if ( executableCommand.contains( XVFB_ERR_PATH  ) )
             {
-                executableCommand = executableCommand.replace(  XVFB_ERR_PATH, sshExecutorService.getCurrentXvfbErrPath() );
+                executableCommand = executableCommand.replace(  XVFB_ERR_PATH, sshExecutorService.getJobXvfbErrPath( jobID ) );
             }
 
             lines.add( "date" );
@@ -56,7 +56,7 @@ public class SlurmJobScript implements JobScript
             lines.add( executableCommand );
         }
 
-        lines.add( sshExecutorService.getJobFinishedCommand() );
+        lines.add( sshExecutorService.getJobFinishedCommand( jobID ) );
 
         return String.join( "\n", lines );
 

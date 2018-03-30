@@ -18,7 +18,8 @@ public class JobFuture implements Future
     public static final String STD_ERR = "StdErr";
     public static final String EVERYTHING_FINE = "No resubmission needed everything seems fine!";
 
-    public static final String XVFB_ERROR = "/usr/bin/xvfb-run";
+    public static final String XVFB_ERROR_01 = "/usr/bin/xvfb-run";
+    public static final String XVFB_ERROR_02 = "...SocketCreateListener() failed";
     public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
 
@@ -68,9 +69,13 @@ public class JobFuture implements Future
     {
         String err = executorService.getJobError( jobID );
 
-        if ( err.contains( XVFB_ERROR ) )
+        if ( err.contains( XVFB_ERROR_01 ) )
         {
-            return XVFB_ERROR;
+            return XVFB_ERROR_01;
+        }
+        else if ( err.contains( XVFB_ERROR_02 ) )
+        {
+            return XVFB_ERROR_02;
         }
         else if ( err.contains( SLURM_TIME_LIMIT_ERROR ) )
         {
