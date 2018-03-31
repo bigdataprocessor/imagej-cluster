@@ -16,19 +16,38 @@ public class JobFuture implements Future
 
     public static final String STD_OUT = "StdOut";
     public static final String STD_ERR = "StdErr";
-    public static final String EVERYTHING_FINE = "No resubmission needed everything seems fine!";
+    public static final String NO_ERROR = "No error";
 
-    public static final String XVFB_ERROR_01 = "/usr/bin/xvfb-run";
-    public static final String XVFB_ERROR_02 = "...SocketCreateListener() failed";
-    public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
+    public static final String XVFB_ERROR_01 = "xvfb-run";
+    public static final String XVFB_ERROR_02 = "SocketCreateListener";
+    public static final String SLURM_TIME_LIMIT_ERROR = "timeLimit";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
+    public static final String UNKNOWN_ERROR = "unkown";
 
+    public static final int MAX_NUM_SUBMISSIONS = 5;
+
+    private int numSubmissions;
+
+    private String status;
+
+    public static final String SUBMITTED = "submitted";
+    public static final String FAILED = "failed";
+    public static final String RUNNING = "running";
+    public static final String ERROR = "error";
+    public static final String FINISHED = "finished";
+
+    boolean finished;
+    boolean failed;
 
     public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
     {
         this.executorService = executorService;
         this.jobID = jobID;
         this.jobScript = jobScript;
+        numSubmissions = 1;
+        status = SUBMITTED;
+        finished = false;
+        failed = false;
     }
 
     public boolean cancel( boolean mayInterruptIfRunning )
@@ -60,12 +79,87 @@ public class JobFuture implements Future
         }
     }
 
-    public boolean isDone()
+    public String getStatus()
     {
-        return executorService.isDone( jobID );
+        if ( status.endsWith( FINISHED ) )
+        {
+            return status;
+        }
+
+        if ( status.endsWith( SUBMITTED ) )
+        {
+            if ( isStarted() )
+            {
+                status += "-running";
+            }
+        }
+
+        if ( status.endsWith( RUNNING ) )
+        {
+            String error = examineError();
+            if ( ! error.equals( NO_ERROR ) )
+            {
+                status += "-" + error + "_" + ERROR;
+            }
+        }
+
+        if ( status.endsWith( ERROR ) )
+        {
+            if ( numSubmissions < MAX_NUM_SUBMISSIONS )
+            {
+                resubmit();
+                status += "-" + SUBMITTED;
+            }
+            else
+            {
+                status += "-" + FAILED;
+            }
+
+            return status;
+        }
+
+        if ( isDone() )
+        {
+            status += "-" + FINISHED;
+        }
+
+        return ( status );
+
     }
 
-    public String needsResubmission()
+    public boolean hasFailed()
+    {
+        if ( failed )
+        {
+            return true;
+        }
+        else
+        {
+            failed = status.endsWith( FAILED );
+            return failed;
+        }
+    }
+
+    public int getNumSubmissions()
+    {
+        return numSubmissions;
+    }
+
+    public boolean isDone()
+    {
+        if ( finished )
+        {
+            return true;
+        }
+        else
+        {
+            finished = executorService.isFinished( jobID );
+            return finished;
+        }
+    }
+
+
+    public String examineError()
     {
         String err = executorService.getJobError( jobID );
 
@@ -77,7 +171,7 @@ public class JobFuture implements Future
         {
             return XVFB_ERROR_02;
         }
-        else if ( err.contains( SLURM_TIME_LIMIT_ERROR ) )
+        else if ( err.contains( "DUE TO TIME LIMIT" ) )
         {
             return SLURM_TIME_LIMIT_ERROR;
         }
@@ -87,15 +181,27 @@ public class JobFuture implements Future
         }
         else if ( err.length() > 10 )
         {
-            return err;
+            return UNKNOWN_ERROR;
         }
 
-        return EVERYTHING_FINE;
+        return NO_ERROR;
     }
 
     public void resubmit()
     {
+
+        renameBasedOnSubmissionNumber( executorService.getJobStartedPath( jobID ) );
+        renameBasedOnSubmissionNumber( executorService.getJobFinishedPath( jobID ) );
+        renameBasedOnSubmissionNumber( executorService.getJobOutPath( jobID ) );
+        renameBasedOnSubmissionNumber( executorService.getJobErrPath( jobID ) );
+        renameBasedOnSubmissionNumber( executorService.getJobXvfbErrPath( jobID ) );
+
         executorService.submit( jobScript, jobID );
+    }
+
+    private void renameBasedOnSubmissionNumber( String filePath )
+    {
+        executorService.getSshConnector().rename( filePath, filePath + numSubmissions );
     }
 
     public String getError()
@@ -108,13 +214,11 @@ public class JobFuture implements Future
         return executorService.getJobOutput( jobID );
     }
 
-
-
     public HashMap< String, Object > get() throws InterruptedException, ExecutionException
     {
         HashMap< String, Object > results = new HashMap<>(  );
 
-        while ( ! executorService.isDone( jobID ) )
+        while ( ! executorService.isFinished( jobID ) )
         {
             Thread.sleep( 10000 );
         }

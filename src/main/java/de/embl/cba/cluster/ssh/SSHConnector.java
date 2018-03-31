@@ -239,9 +239,7 @@ public class SSHConnector
     {
         try
         {
-            Utils.logger.info( "# Renaming remote file:" );
-            Utils.logger.info( "Original path: " + oldPath );
-            Utils.logger.info( "New path: " + newPath );
+            Utils.logger.info( "# Renaming remote file: "  + oldPath + " to " + newPath );
 
             connectChannelSftp();
 

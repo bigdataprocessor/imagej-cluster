@@ -210,7 +210,7 @@ public class SSHExecutorService implements ExecutorService
         return jobSubmissionCommand;
     }
 
-    public boolean isDone( long jobID )
+    public boolean isFinished( long jobID )
     {
         return sshConnector.fileExists( jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID ) );
     }
@@ -266,13 +266,22 @@ public class SSHExecutorService implements ExecutorService
 
     public String getJobStartedCommand( long jobID )
     {
-        return createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID );
+        return createEmptyFileCommand + getJobStartedPath( jobID );
     }
 
     public String getJobFinishedCommand( long jobID )
     {
-        return createEmptyFileCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
+        return createEmptyFileCommand + getJobFinishedPath( jobID  ) ;
+    }
 
+    public String getJobFinishedPath( long jobID  )
+    {
+        return jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
+    }
+
+    public String getJobStartedPath( long jobID  )
+    {
+        return jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID ) ;
     }
 
     public String getJobXvfbErrFilename( long jobID  )
@@ -295,5 +304,8 @@ public class SSHExecutorService implements ExecutorService
         return jobID + JOB;
     }
 
-
+    public SSHConnector getSshConnector()
+    {
+        return sshConnector;
+    }
 }
