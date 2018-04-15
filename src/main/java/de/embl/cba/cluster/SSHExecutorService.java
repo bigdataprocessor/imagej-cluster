@@ -4,6 +4,7 @@ import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -40,6 +41,8 @@ public class SSHExecutorService implements ExecutorService
 
     private String jobDirectory;
     private String jobSubmissionType;
+    private String dateTime;
+    private int numJobsSubmitted;
 
     // Commands
     private String submitJobCommand;
@@ -57,9 +60,19 @@ public class SSHExecutorService implements ExecutorService
         this.jobDirectory = jobDirectory;
         this.jobSubmissionType = jobSubmissionType;
 
+        numJobsSubmitted = 0;
+        
+        setDateAndTime();
+
         makeRemoteDirectoryCommand = "mkdir ";
         makeScriptExecutableCommand = "chmod +x ";
         createEmptyFileCommand = "touch ";
+    }
+
+    private void setDateAndTime()
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMddhhmmss");
+        dateTime = simpleDateFormat.format( new Date() );
     }
 
     public void shutdown()
@@ -106,13 +119,13 @@ public class SSHExecutorService implements ExecutorService
 
     public synchronized JobFuture submit( JobScript jobScript )
     {
-        long jobID = getJobID();
+        String jobID = getJobID();
 
         return submit( jobScript, jobID );
     }
 
 
-    public synchronized JobFuture submit( JobScript jobScript, long jobID )
+    public synchronized JobFuture submit( JobScript jobScript, String jobID )
     {
         ensureExistenceOfRemoteJobDirectory( );
 
@@ -123,7 +136,7 @@ public class SSHExecutorService implements ExecutorService
         return createJobFuture( jobID, jobScript );
     }
 
-    private JobFuture createJobFuture( long jobID, JobScript jobScript )
+    private JobFuture createJobFuture( String jobID, JobScript jobScript )
     {
         JobFuture jobFuture = new JobFuture( this, jobID, jobScript );
 
@@ -167,23 +180,23 @@ public class SSHExecutorService implements ExecutorService
         }
     }
 
-    public String getJobOutput( long jobID )
+    public String getJobOutput( String jobID )
     {
         return sshConnector.readRemoteTextFileUsingSFTP( jobDirectory, getJobOutFilename( jobID )  );
     }
 
-    public String getJobError( long jobID )
+    public String getJobError( String jobID )
     {
         return sshConnector.readRemoteTextFileUsingSFTP( jobDirectory, getJobErrFilename( jobID )  );
     }
 
-    private HashMap< String, ArrayList< String > > submitJob( long jobID )
+    private HashMap< String, ArrayList< String > > submitJob( String jobID )
     {
         HashMap< String, ArrayList< String > > responses = sshConnector.executeCommand( getJobSubmissionCommand( jobID ) );
         return responses;
     }
 
-    private String getJobSubmissionCommand( long jobID )
+    private String getJobSubmissionCommand( String jobID )
     {
         String jobSubmissionCommand = "";
 
@@ -210,37 +223,41 @@ public class SSHExecutorService implements ExecutorService
         return jobSubmissionCommand;
     }
 
-    public boolean isFinished( long jobID )
+    public boolean isFinished( String jobID )
     {
         return sshConnector.fileExists( jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID ) );
     }
 
-    public boolean isStarted( long jobID )
+    public boolean isStarted( String jobID )
     {
         return sshConnector.fileExists( jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID ) );
     }
 
-    private String getJobFinishedFilename( long jobID )
+    private String getJobFinishedFilename( String jobID )
     {
         return jobID + FINISHED;
     }
 
-    private String getJobStartedFilename( long jobID )
+    private String getJobStartedFilename( String jobID )
     {
-        return jobID + STARTED;
+        return ( jobID + STARTED );
     }
 
-    private void createRemoteJobFile( long jobID, JobScript jobScript )
+    private void createRemoteJobFile( String jobID, JobScript jobScript )
     {
         String jobText = jobScript.getJobText( this, jobID );
         sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, jobDirectory, getJobFilename( jobID ) );
         //sshConnector.executeCommand( makeScriptExecutableCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID ) );
     }
 
-    private long getJobID()
+    private String getJobID()
     {
         Random random = new Random();
-        long jobID = random.nextLong() & Long.MAX_VALUE;
+        
+        String jobID = dateTime + "_" + String.format( "%05d", numJobsSubmitted );
+        
+        numJobsSubmitted++;
+        
         return jobID;
     }
 
@@ -249,57 +266,57 @@ public class SSHExecutorService implements ExecutorService
         return jobDirectory;
     }
 
-    public String getJobXvfbErrPath( long jobID )
+    public String getJobXvfbErrPath( String jobID )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobXvfbErrFilename( jobID  );
     }
 
-    public String getJobOutPath( long jobID )
+    public String getJobOutPath( String jobID )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobOutFilename( jobID  );
     }
 
-    public String getJobErrPath( long jobID )
+    public String getJobErrPath( String jobID )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobErrFilename( jobID  );
     }
 
-    public String getJobStartedCommand( long jobID )
+    public String getJobStartedCommand( String jobID )
     {
         return createEmptyFileCommand + getJobStartedPath( jobID );
     }
 
-    public String getJobFinishedCommand( long jobID )
+    public String getJobFinishedCommand( String jobID )
     {
         return createEmptyFileCommand + getJobFinishedPath( jobID  ) ;
     }
 
-    public String getJobFinishedPath( long jobID  )
+    public String getJobFinishedPath( String jobID  )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobFinishedFilename( jobID );
     }
 
-    public String getJobStartedPath( long jobID  )
+    public String getJobStartedPath( String jobID  )
     {
         return jobDirectory + sshConnector.remoteFileSeparator() + getJobStartedFilename( jobID ) ;
     }
 
-    public String getJobXvfbErrFilename( long jobID  )
+    public String getJobXvfbErrFilename( String jobID  )
     {
         return jobID + XVFB_ERROR ;
     }
 
-    public String getJobOutFilename( long jobID  )
+    public String getJobOutFilename( String jobID  )
     {
         return jobID + OUTPUT ;
     }
 
-    public String getJobErrFilename( long jobID  )
+    public String getJobErrFilename( String jobID  )
     {
         return jobID + ERROR ;
     }
 
-    private String getJobFilename( long jobID )
+    private String getJobFilename( String jobID )
     {
         return jobID + JOB;
     }

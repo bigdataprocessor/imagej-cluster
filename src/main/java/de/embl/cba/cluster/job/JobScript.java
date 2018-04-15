@@ -4,5 +4,5 @@ import de.embl.cba.cluster.SSHExecutorService;
 
 public interface JobScript
 {
-    String getJobText( SSHExecutorService SSHExecutorService, long jobID );
+    String getJobText( SSHExecutorService SSHExecutorService, String jobID );
 }

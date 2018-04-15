@@ -23,7 +23,7 @@ public class SlurmJobScript implements JobScript
         this.jobSettings = jobSettings;
     }
 
-    public String getJobText( SSHExecutorService sshExecutorService, long jobID )
+    public String getJobText( SSHExecutorService sshExecutorService, String jobID )
     {
 
         ArrayList < String > lines = new ArrayList< >(  );

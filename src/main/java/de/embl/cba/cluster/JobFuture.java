@@ -1,6 +1,7 @@
 package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
+import de.embl.cba.cluster.ssh.SSHConnector;
 
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 public class JobFuture implements Future
 {
     SSHExecutorService executorService;
-    long jobID;
+    String jobID;
     JobScript jobScript;
 
     public static final String STD_OUT = "StdOut";
@@ -26,11 +27,12 @@ public class JobFuture implements Future
 
     public static final int MAX_NUM_SUBMISSIONS = 5;
 
-    private int numSubmissions;
+    private int numReSubmissions;
 
     private String status;
 
     public static final String SUBMITTED = "submitted";
+    public static final String RESUBMITTED = "resubmitted";
     public static final String FAILED = "failed";
     public static final String RUNNING = "running";
     public static final String ERROR = "error";
@@ -39,12 +41,12 @@ public class JobFuture implements Future
     boolean finished;
     boolean failed;
 
-    public JobFuture( SSHExecutorService executorService, long jobID, JobScript jobScript )
+    public JobFuture( SSHExecutorService executorService, String jobID, JobScript jobScript )
     {
         this.executorService = executorService;
         this.jobID = jobID;
         this.jobScript = jobScript;
-        numSubmissions = 1;
+        numReSubmissions = 0;
         status = SUBMITTED;
         finished = false;
         failed = false;
@@ -62,7 +64,7 @@ public class JobFuture implements Future
         return false;
     }
 
-    public long getJobID()
+    public String getJobID()
     {
         return jobID;
     }
@@ -105,10 +107,10 @@ public class JobFuture implements Future
 
         if ( status.endsWith( ERROR ) )
         {
-            if ( numSubmissions < MAX_NUM_SUBMISSIONS )
+            if ( numReSubmissions < MAX_NUM_SUBMISSIONS )
             {
                 resubmit();
-                status += "-" + SUBMITTED;
+                status += "-" + RESUBMITTED;
             }
             else
             {
@@ -140,9 +142,9 @@ public class JobFuture implements Future
         }
     }
 
-    public int getNumSubmissions()
+    public int getNumReSubmissions()
     {
-        return numSubmissions;
+        return numReSubmissions;
     }
 
     public boolean isDone()
@@ -179,6 +181,14 @@ public class JobFuture implements Future
         {
             return SLURM_STEP_ERROR;
         }
+        else if ( err.equals( SSHConnector.IO_EXCEPTION ) )
+        {
+            return NO_ERROR; // error file could not be read
+        }
+        else if ( err.equals( SSHConnector.SFTP_EXCEPTION ) )
+        {
+            return NO_ERROR; // error file could not be read
+        }
         else if ( err.length() > 10 )
         {
             return UNKNOWN_ERROR;
@@ -189,7 +199,6 @@ public class JobFuture implements Future
 
     public void resubmit()
     {
-
         renameBasedOnSubmissionNumber( executorService.getJobStartedPath( jobID ) );
         renameBasedOnSubmissionNumber( executorService.getJobFinishedPath( jobID ) );
         renameBasedOnSubmissionNumber( executorService.getJobOutPath( jobID ) );
@@ -197,11 +206,13 @@ public class JobFuture implements Future
         renameBasedOnSubmissionNumber( executorService.getJobXvfbErrPath( jobID ) );
 
         executorService.submit( jobScript, jobID );
+
+        numReSubmissions++;
     }
 
     private void renameBasedOnSubmissionNumber( String filePath )
     {
-        executorService.getSshConnector().rename( filePath, filePath + numSubmissions );
+        executorService.getSshConnector().rename( filePath, filePath + "_" + numReSubmissions );
     }
 
     public String getError()

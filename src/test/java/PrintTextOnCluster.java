@@ -5,6 +5,7 @@ import de.embl.cba.cluster.SlurmJobMonitor;
 import de.embl.cba.cluster.commands.PrintTextCommand;
 import de.embl.cba.utils.fileutils.PathMapper;
 import de.embl.cba.utils.logging.IJLazySwingLogger;
+import net.imagej.ImageJ;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -12,6 +13,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.TextWidget;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,14 +42,14 @@ public class PrintTextOnCluster implements Command
     public int numJobs = 4;
 
     @Parameter (label = "Memory [MB]"  )
-    public int memoryMB = 16000;
+    public int memoryMB = 2000;
 
     @Parameter (label = "Number of threads per job" )
-    public int numWorkers = 4;
+    public int numWorkers = 1;
 
 
     @Parameter (label = "Time per job in minutes" )
-    public int timePerJobInMinutes = 10;
+    public int timePerJobInMinutes = 3;
 
     @Parameter( label = "ImageJ executable (must be linux and cluster accessible)", required = false )
     public File imageJFile;
@@ -122,13 +124,18 @@ public class PrintTextOnCluster implements Command
 
     private void setCommandAndParameterStrings( ImageJCommandsSubmitter commandsSubmitter, String text )
     {
-
         Map< String, Object > parameters = new HashMap<>();
         parameters.clear();
         parameters.put( PrintTextCommand.INPUT_TEXT, inputText );
         parameters.put( PrintTextCommand.QUIT_AFTER_RUN, true );
         commandsSubmitter.addIJCommandWithParameters( PrintTextCommand.PLUGIN_NAME , parameters );
+    }
 
+    public static void main ( String[] args ) throws IOException
+    {
+        ImageJ ij = new ImageJ();
+        ij.ui().showUI();
+        ij.command().run( PrintTextOnCluster.class, true );
     }
 
 }

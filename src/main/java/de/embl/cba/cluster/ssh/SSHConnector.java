@@ -28,6 +28,8 @@ public class SSHConnector
     public static final String OUTPUT = "out";
     public static final String ERROR = "err";
 
+    public static final String IO_EXCEPTION = "IO_Exception";
+    public static final String SFTP_EXCEPTION = "SFTP_Exception";
 
     public SSHConnector( SSHConnectorConfig loginSettings )
     {
@@ -115,7 +117,7 @@ public class SSHConnector
 
     public HashMap< String, ArrayList<String> > executeCommand( String command )
     {
-        Utils.logger.info( "# Executing remote command: " + command );
+        //Utils.logger.info( "# Executing remote command: " + command );
 
         if ( session == null )
         {
@@ -164,7 +166,8 @@ public class SSHConnector
         catch ( IOException e )
         {
             e.printStackTrace();
-        } catch ( JSchException e )
+        }
+        catch ( JSchException e )
         {
             e.printStackTrace();
         }
@@ -239,7 +242,7 @@ public class SSHConnector
     {
         try
         {
-            Utils.logger.info( "# Renaming remote file: "  + oldPath + " to " + newPath );
+            //Utils.logger.info( "# Renaming remote file: "  + oldPath + " to " + newPath );
 
             connectChannelSftp();
 
@@ -248,14 +251,14 @@ public class SSHConnector
         }
         catch ( SftpException e )
         {
-            Utils.logger.error( e.toString() );
+            Utils.logger.warning( e.toString() );
         }
     }
 
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
     {
-        Utils.logger.info( "# Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
+        // Utils.logger.info( "# Reading from remote file: " + remoteDirectory + "/" + remoteFileName );
 
         try
         {
@@ -270,14 +273,14 @@ public class SSHConnector
         }
         catch ( IOException e )
         {
-            Utils.logger.error( e.toString() );
+            Utils.logger.warning( e.toString() );
+            return IO_EXCEPTION;
         }
         catch ( SftpException e )
         {
-            Utils.logger.error( e.toString() );
+            Utils.logger.warning( e.toString() );
+            return SFTP_EXCEPTION;
         }
-
-        return "Error reading file...";
 
     }
 

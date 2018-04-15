@@ -13,7 +13,7 @@ public class SimpleLinuxJobScript implements JobScript
         this.executableCommands = executableCommands;
     }
 
-    public String getJobText( SSHExecutorService SSHExecutorService )
+    public String getJobText( SSHExecutorService SSHExecutorService, String jobID )
     {
 
         ArrayList < String > lines = new ArrayList< >(  );
@@ -22,11 +22,11 @@ public class SimpleLinuxJobScript implements JobScript
 //        lines.add( "#SBATCH -e " + SSHExecutorService.getCurrentJobErrPath() );
 //        lines.add( "#SBATCH -o " + SSHExecutorService.getCurrentJobOutPath() );
 
-        lines.add( SSHExecutorService.getJobStartedCommand() );
+        lines.add( SSHExecutorService.getJobStartedCommand( jobID ) );
 
         for ( String r : executableCommands ) lines.add ( r );
 
-        lines.add( SSHExecutorService.getJobFinishedCommand() );
+        lines.add( SSHExecutorService.getJobFinishedCommand( jobID ) );
 
         return String.join( "\n", lines );
 
