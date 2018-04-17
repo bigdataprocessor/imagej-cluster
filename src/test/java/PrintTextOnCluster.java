@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/* Simple test, just printing text onto command line */
+
 @Plugin(type = Command.class, menuPath = "Plugins>Sandbox>ClusterTest>Print Text On Cluster" )
 public class PrintTextOnCluster implements Command
 {
