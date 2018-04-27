@@ -2,7 +2,6 @@ package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
-import net.imglib2.RandomAccessibleInterval;
 
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
@@ -22,8 +21,10 @@ public class JobFuture implements Future
 
     public static final String XVFB_ERROR_01 = "xvfb-run";
     public static final String XVFB_ERROR_02 = "SocketCreateListener";
-    public static final String SLURM_TIME_LIMIT_ERROR = "timeLimit";
+    public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
+    public static final String JVM_WARNING = "VM warning";
+
     public static final String UNKNOWN_ERROR = "unkown";
 
     public static final int MAX_NUM_SUBMISSIONS = 5;
@@ -104,20 +105,20 @@ public class JobFuture implements Future
 
         if ( currentStatus.equals( RUNNING ) )
         {
-            String error = examineError();
+            String error = checkForErrors();
 
-            if ( ! error.equals( NO_ERROR ) )
-            {
-                currentStatus = ERROR;
-                statusHistory += "-" + error + "_" + ERROR;
-            }
-            else
+            if ( error.equals( NO_ERROR ) )
             {
                 if ( executorService.isFinished( jobID ) )
                 {
                     currentStatus = FINISHED;
                     statusHistory += "-" + FINISHED;
                 }
+            }
+            else
+            {
+                currentStatus = ERROR;
+                statusHistory += "-" + error + "_" + ERROR;
             }
 
         }
@@ -152,7 +153,7 @@ public class JobFuture implements Future
     }
 
 
-    public String examineError()
+    public String checkForErrors()
     {
         String err = executorService.getJobError( jobID );
 
@@ -164,7 +165,7 @@ public class JobFuture implements Future
         {
             return XVFB_ERROR_02;
         }
-        else if ( err.contains( "DUE TO TIME LIMIT" ) )
+        else if ( err.contains( SLURM_TIME_LIMIT_ERROR ) )
         {
             return SLURM_TIME_LIMIT_ERROR;
         }
@@ -179,6 +180,10 @@ public class JobFuture implements Future
         else if ( err.equals( SSHConnector.SFTP_EXCEPTION ) )
         {
             return NO_ERROR; // error file could not be read
+        }
+        else if ( err.contains( JVM_WARNING ) )
+        {
+            return NO_ERROR;
         }
         else if ( err.length() > 10 )
         {

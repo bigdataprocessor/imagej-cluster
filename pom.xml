@@ -16,7 +16,7 @@
 
     <groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
-	<version>0.2.3</version>
+	<version>0.2.4</version>
 
     <build>
         <plugins>
