@@ -6,52 +6,74 @@ import java.util.ArrayList;
 
 public class SlurmJobMonitor
 {
-    class Status
+    Logger logger;
+    Status currentStatus;
+
+    public SlurmJobMonitor( Logger logger )
     {
-        int numStarted = 0;
-        int numResubmitted = 0;
-        int numFinished = 0;
-        int numXvfbErrors = 0;
-        int numSlurmStepErrors = 0;
-        int numUnkownErrors = 0;
-        int numFailed = 0;
+        this.logger = logger;
     }
 
-    public void monitorJobProgress( ArrayList< JobFuture > jobFutures, Logger logger )
+    public void monitorJobProgress( ArrayList< JobFuture > jobFutures, int monitoringIntervalInSeconds, int maxNumResubmissions )
     {
-        Status status = new Status();
+        currentStatus = new Status();
 
-        while ( ( status.numFinished + status.numFailed ) < jobFutures.size() )
+        while ( ( currentStatus.numFinished + currentStatus.numFailed ) < jobFutures.size() )
         {
-            try { Thread.sleep( 10000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+            sleep( monitoringIntervalInSeconds );
 
-            status.numStarted = 0;
-            status.numResubmitted = 0;
-            status.numFailed = 0;
-            status.numFinished = 0;
+            currentStatus.numRunning = 0;
+            currentStatus.numResubmitted = 0;
+            currentStatus.numFailed = 0;
+            currentStatus.numFinished = 0;
 
             for ( JobFuture jobFuture : jobFutures )
             {
-                if ( jobFuture.isStarted() ) status.numStarted++;
-                if ( jobFuture.isDone() ) status.numFinished++;
-                if ( jobFuture.hasFailed() ) status.numFailed++;
-                status.numResubmitted += jobFuture.getNumReSubmissions();
+                jobFuture.refreshStatus();
 
-                String jobStatus = jobFuture.getStatus();
+                logger.info( jobFuture.getJobID() + ": " + jobFuture.getStatusHistory() );
 
-                logger.info( jobFuture.getJobID() + ": " + jobStatus );
+                String currentStatusString = jobFuture.getCurrentStatus();
+
+                currentStatus.numResubmitted += jobFuture.getNumReSubmissions();
+
+                if ( currentStatusString.equals( JobFuture.RUNNING ) )
+                {
+                    currentStatus.numRunning++;
+                }
+                else if ( currentStatusString.equals( JobFuture.ERROR ) )
+                {
+                    if ( jobFuture.getNumReSubmissions() < maxNumResubmissions )
+                    {
+                        jobFuture.resubmit();
+                        currentStatus.numRunning++;
+                    }
+                    else
+                    {
+                        currentStatus.numFailed++;
+                    }
+                }
+                else if ( currentStatusString.equals( JobFuture.FINISHED ) )
+                {
+                    currentStatus.numFinished++;
+                }
 
             }
 
-            logJobStati( jobFutures, logger, status );
+            logJobStati( jobFutures, currentStatus );
 
         }
 
-        finalReport( logger, status );
+        finalReport( currentStatus );
 
     }
 
-    private void finalReport( Logger logger, Status status )
+    private void sleep( int monitoringIntervalInSeconds )
+    {
+        try { Thread.sleep( monitoringIntervalInSeconds * 1000 ); } catch ( InterruptedException e ) { e.printStackTrace(); }
+    }
+
+    private void finalReport( Status status )
     {
         if ( status.numFailed > 0 )
         {
@@ -63,17 +85,29 @@ public class SlurmJobMonitor
         }
     }
 
-    private static void logJobStati( ArrayList< JobFuture > jobFutures, Logger logger, Status status )
+    private void logJobStati( ArrayList< JobFuture > jobFutures, Status status )
     {
         logger.info( " " );
         logger.info( "# Current job status summary" );
         logger.info( "Submitted: " + jobFutures.size() );
-        logger.info( "Started: " + status.numStarted );
+        logger.info( "Started: " + status.numRunning );
         logger.info( "Finished: " + status.numFinished );
         logger.info( "Resubmitted: " + status.numResubmitted );
-        logger.info( "Failed (> 5 resubmissions): " + status.numFailed );
+        logger.info( "Failed (too many resubmissions): " + status.numFailed );
         logger.info( " " );
     }
+
+    class Status
+    {
+        int numRunning = 0;
+        int numResubmitted = 0;
+        int numFinished = 0;
+        int numXvfbErrors = 0;
+        int numSlurmStepErrors = 0;
+        int numUnkownErrors = 0;
+        int numFailed = 0;
+    }
+
 }
 
 

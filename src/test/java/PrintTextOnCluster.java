@@ -65,8 +65,8 @@ public class PrintTextOnCluster implements Command
         logger.setLogService( logService );
 
         ArrayList< JobFuture > jobFutures = submitJobsOnSlurm( getImageJExecutionString( imageJFile ), jobDirectory.toPath() );
-        SlurmJobMonitor slurmJobMonitor = new SlurmJobMonitor();
-        slurmJobMonitor.monitorJobProgress( jobFutures, logger );
+        SlurmJobMonitor slurmJobMonitor = new SlurmJobMonitor( logger );
+        slurmJobMonitor.monitorJobProgress( jobFutures, 3, 0 );
 
     }
 
@@ -85,6 +85,15 @@ public class PrintTextOnCluster implements Command
             commandsSubmitter.clearCommands();
             setCommandAndParameterStrings( commandsSubmitter, inputText );
             jobFutures.add( commandsSubmitter.submitCommands( jobSettings ) );
+
+            try
+            {
+                Thread.sleep( 5000 );
+            }
+            catch ( InterruptedException e )
+            {
+                e.printStackTrace();
+            }
         }
 
         return jobFutures;

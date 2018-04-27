@@ -5,6 +5,15 @@
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>19.2.0</version>
+		<relativePath />
+	</parent>
+
+
     <groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
 	<version>0.2.3</version>
@@ -93,13 +102,6 @@
 		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
-
-	<parent>
-		<groupId>org.scijava</groupId>
-		<artifactId>pom-scijava</artifactId>
-		<version>19.1.1</version>
-		<relativePath />
-	</parent>
 
 	<repositories>
 

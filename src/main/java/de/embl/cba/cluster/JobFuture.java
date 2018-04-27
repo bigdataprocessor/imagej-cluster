@@ -2,6 +2,7 @@ package de.embl.cba.cluster;
 
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
+import net.imglib2.RandomAccessibleInterval;
 
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +30,8 @@ public class JobFuture implements Future
 
     private int numReSubmissions;
 
-    private String status;
+    private String statusHistory;
+    private String currentStatus;
 
     public static final String SUBMITTED = "submitted";
     public static final String RESUBMITTED = "resubmitted";
@@ -47,9 +49,10 @@ public class JobFuture implements Future
         this.jobID = jobID;
         this.jobScript = jobScript;
         numReSubmissions = 0;
-        status = SUBMITTED;
+        statusHistory = SUBMITTED;
         finished = false;
         failed = false;
+        currentStatus = SUBMITTED;
     }
 
     public boolean cancel( boolean mayInterruptIfRunning )
@@ -81,65 +84,54 @@ public class JobFuture implements Future
         }
     }
 
-    public String getStatus()
+
+    public void refreshStatus()
     {
-        if ( status.endsWith( FINISHED ) )
+
+        if ( currentStatus.equals( FINISHED ) )
         {
-            return status;
+            return;
         }
 
-        if ( status.endsWith( SUBMITTED ) )
+        if ( currentStatus.equals( SUBMITTED ) )
         {
             if ( isStarted() )
             {
-                status += "-running";
+                currentStatus = RUNNING;
+                statusHistory += "-" + RUNNING;
             }
         }
 
-        if ( status.endsWith( RUNNING ) )
+        if ( currentStatus.equals( RUNNING ) )
         {
             String error = examineError();
+
             if ( ! error.equals( NO_ERROR ) )
             {
-                status += "-" + error + "_" + ERROR;
-            }
-        }
-
-        if ( status.endsWith( ERROR ) )
-        {
-            if ( numReSubmissions < MAX_NUM_SUBMISSIONS )
-            {
-                resubmit();
-                status += "-" + RESUBMITTED;
+                currentStatus = ERROR;
+                statusHistory += "-" + error + "_" + ERROR;
             }
             else
             {
-                status += "-" + FAILED;
+                if ( executorService.isFinished( jobID ) )
+                {
+                    currentStatus = FINISHED;
+                    statusHistory += "-" + FINISHED;
+                }
             }
 
-            return status;
         }
-
-        if ( isDone() )
-        {
-            status += "-" + FINISHED;
-        }
-
-        return ( status );
 
     }
 
-    public boolean hasFailed()
+    public String getStatusHistory()
     {
-        if ( failed )
-        {
-            return true;
-        }
-        else
-        {
-            failed = status.endsWith( FAILED );
-            return failed;
-        }
+        return statusHistory;
+    }
+
+    public String getCurrentStatus()
+    {
+        return currentStatus;
     }
 
     public int getNumReSubmissions()
@@ -155,8 +147,7 @@ public class JobFuture implements Future
         }
         else
         {
-            finished = executorService.isFinished( jobID );
-            return finished;
+            return false;
         }
     }
 
@@ -206,6 +197,8 @@ public class JobFuture implements Future
         renameBasedOnSubmissionNumber( executorService.getJobXvfbErrPath( jobID ) );
 
         executorService.submit( jobScript, jobID );
+
+        statusHistory += "-" + RESUBMITTED;
 
         numReSubmissions++;
     }
