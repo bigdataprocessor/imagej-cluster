@@ -1,5 +1,6 @@
 package de.embl.cba.cluster;
 
+import com.sun.org.apache.regexp.internal.RE;
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
@@ -24,6 +25,7 @@ public class JobFuture implements Future
     public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
     public static final String JVM_WARNING = "VM warning";
+    public static final String HDF5_ERROR = "hdf5";
 
     public static final String UNKNOWN_ERROR = "unkown";
 
@@ -35,7 +37,6 @@ public class JobFuture implements Future
     private String currentStatus;
 
     public static final String SUBMITTED = "submitted";
-    public static final String RESUBMITTED = "resubmitted";
     public static final String FAILED = "failed";
     public static final String RUNNING = "running";
     public static final String ERROR = "error";
@@ -173,6 +174,10 @@ public class JobFuture implements Future
         {
             return SLURM_STEP_ERROR;
         }
+        else if ( err.contains( HDF5_ERROR) )
+        {
+            return HDF5_ERROR;
+        }
         else if ( err.equals( SSHConnector.IO_EXCEPTION ) )
         {
             return NO_ERROR; // error file could not be read
@@ -203,7 +208,9 @@ public class JobFuture implements Future
 
         executorService.submit( jobScript, jobID );
 
-        statusHistory += "-" + RESUBMITTED;
+        statusHistory += "-" + SUBMITTED;
+
+        currentStatus = SUBMITTED;
 
         numReSubmissions++;
     }
