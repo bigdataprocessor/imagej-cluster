@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static de.embl.cba.cluster.ImageJCommandsSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS;
+
 /* Simple test, just printing text onto command line */
 
 @Plugin(type = Command.class, menuPath = "Plugins>Sandbox>ClusterTest>Print Text On Cluster" )
@@ -49,13 +51,9 @@ public class PrintTextOnCluster implements Command
     @Parameter (label = "Number of threads per job" )
     public int numWorkers = 1;
 
-
     @Parameter (label = "Time per job in minutes" )
     public int timePerJobInMinutes = 3;
 
-    @Parameter( label = "ImageJ executable (must be linux and cluster accessible)", required = false )
-    public File imageJFile;
-    public static final String IMAGEJ_FILE = "imageJFile";
 
     IJLazySwingLogger logger = new IJLazySwingLogger();
 
@@ -64,7 +62,7 @@ public class PrintTextOnCluster implements Command
 
         logger.setLogService( logService );
 
-        ArrayList< JobFuture > jobFutures = submitJobsOnSlurm( getImageJExecutionString( imageJFile ), jobDirectory.toPath() );
+        ArrayList< JobFuture > jobFutures = submitJobsOnSlurm( IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS, jobDirectory.toPath() );
         SlurmJobMonitor slurmJobMonitor = new SlurmJobMonitor( logger );
         slurmJobMonitor.monitorJobProgress( jobFutures, 3, 0 );
 
@@ -118,20 +116,6 @@ public class PrintTextOnCluster implements Command
                 username,
                 password );
     }
-
-    public static String getImageJExecutionString( File imageJFile )
-    {
-        if ( imageJFile == null )
-        {
-            return ImageJCommandsSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB;
-        }
-        else
-        {
-            String clusterMountedImageJ = PathMapper.asEMBLClusterMounted( imageJFile.getAbsolutePath() );
-            return "xvfb-run -a -e XVFB_ERR_PATH " + clusterMountedImageJ + " --mem=MEMORY_MB --run";
-        }
-    }
-
 
     private void setCommandAndParameterStrings( ImageJCommandsSubmitter commandsSubmitter, String text )
     {

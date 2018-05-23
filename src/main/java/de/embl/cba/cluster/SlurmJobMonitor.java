@@ -93,7 +93,7 @@ public class SlurmJobMonitor
         logger.info( "Started: " + status.numRunning );
         logger.info( "Finished: " + status.numFinished );
         logger.info( "Resubmitted: " + status.numResubmitted );
-        logger.info( "Failed (too many resubmissions): " + status.numFailed );
+        logger.info( "Failed: " + status.numFailed );
         logger.info( " " );
     }
 

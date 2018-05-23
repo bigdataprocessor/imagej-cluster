@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileSaver;
 import net.imagej.DatasetService;
+import net.imagej.legacy.IJ1Helper;
 import net.imagej.ops.OpService;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
@@ -13,6 +14,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 import org.scijava.widget.FileWidget;
+import net.imagej.legacy.LegacyService;
 
 import java.io.File;
 
@@ -20,6 +22,9 @@ import java.io.File;
 public class PrintTextCommand implements Command
 {
     public static final String PLUGIN_NAME = "Print text";
+
+    @Parameter
+    private LegacyService legacyService;
 
     @Parameter
     public LogService logService;
@@ -36,7 +41,9 @@ public class PrintTextCommand implements Command
     {
         logService.info( "# PrintTextCommand" );
         logService.info( "Text: " + inputText );
-        IJ.log( inputText );
+
+        final IJ1Helper helper = legacyService.getIJ1Helper();
+        logService.info( "isRMIEnabled: " + helper.isRMIEnabled() );
 
         if ( quitAfterRun ) Commands.quitImageJ( logService );
 

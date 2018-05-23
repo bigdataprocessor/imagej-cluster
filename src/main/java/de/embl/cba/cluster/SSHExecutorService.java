@@ -51,21 +51,23 @@ public class SSHExecutorService implements ExecutorService
     private String makeScriptExecutableCommand;
     private String createEmptyFileCommand;
 
-    public SSHExecutorService( SSHConnector sshConnector,
-                               String jobDirectory,
-                               String jobSubmissionType )
+    public SSHExecutorService( SSHConnector sshConnector, String jobDirectory, String jobSubmissionType )
     {
+
+        setDateAndTime();
+
         this.sshConnector = sshConnector;
 
-        this.jobDirectory = jobDirectory;
+        this.jobDirectory = jobDirectory + "/" + dateTime;
+
         this.jobSubmissionType = jobSubmissionType;
 
         numJobsSubmitted = 0;
-        
-        setDateAndTime();
 
-        makeRemoteDirectoryCommand = "mkdir ";
+        makeRemoteDirectoryCommand = "mkdir -p ";
+
         makeScriptExecutableCommand = "chmod +x ";
+
         createEmptyFileCommand = "touch ";
     }
 
@@ -252,9 +254,8 @@ public class SSHExecutorService implements ExecutorService
 
     private String getJobID()
     {
-        Random random = new Random();
-        
-        String jobID = dateTime + "_" + String.format( "%05d", numJobsSubmitted );
+
+        String jobID = String.format( "%05d", numJobsSubmitted );
         
         numJobsSubmitted++;
         
