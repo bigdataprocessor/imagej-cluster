@@ -16,7 +16,7 @@
 
     <groupId>de.embl.cba</groupId>
 	<artifactId>fiji-slurm</artifactId>
-	<version>0.4.0</version>
+	<version>0.5.00</version>
 
     <build>
         <plugins>
@@ -176,6 +176,14 @@
 
 
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>bintray-embl-cba-snapshots</id>
+			<name>embl-cba-snapshots</name>
+			<url>https://api.bintray.com/maven/embl-cba/snapshots/fiji-slurm/;publish=1</url>
+		</repository>
+	</distributionManagement>
 
 
 

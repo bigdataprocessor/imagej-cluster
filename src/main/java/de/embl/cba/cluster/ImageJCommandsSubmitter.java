@@ -9,6 +9,7 @@ import de.embl.cba.cluster.ssh.SSHConnectorConfig;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 public class ImageJCommandsSubmitter
 {
@@ -30,7 +31,11 @@ public class ImageJCommandsSubmitter
     private ArrayList< String > commands;
     private SSHExecutorService sshExecutorService;
 
-    public ImageJCommandsSubmitter( String executionSystem, String remoteJobDirectory, String remoteImageJExectuable, String username, String password )
+    public ImageJCommandsSubmitter( String executionSystem,
+                                    String remoteJobDirectory,
+                                    String remoteImageJExectuable,
+                                    String username,
+                                    String password )
     {
         this.executionSystem = executionSystem;
         this.remoteImageJExectuable = remoteImageJExectuable;
@@ -134,7 +139,10 @@ public class ImageJCommandsSubmitter
             SSHConnectorConfig sshConnectorConfig = new SSHConnectorConfig( username, password, hostname );
             SSHConnector sshConnector = new SSHConnector( sshConnectorConfig );
 
-            sshExecutorService = new SSHExecutorService( sshConnector, remoteJobDirectory, jobSubmissionType );
+            sshExecutorService = new SSHExecutorService(
+                    sshConnector,
+                    remoteJobDirectory,
+                    jobSubmissionType );
         }
 
         return sshExecutorService;

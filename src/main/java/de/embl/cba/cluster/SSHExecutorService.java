@@ -53,7 +53,6 @@ public class SSHExecutorService implements ExecutorService
 
     public SSHExecutorService( SSHConnector sshConnector, String jobDirectory, String jobSubmissionType )
     {
-
         setDateAndTime();
 
         this.sshConnector = sshConnector;

@@ -62,9 +62,16 @@ public class PrintTextOnCluster implements Command
 
         logger.setLogService( logService );
 
-        ArrayList< JobFuture > jobFutures = submitJobsOnSlurm( IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS, jobDirectory.toPath() );
+        ArrayList< JobFuture > jobFutures = submitJobsOnSlurm(
+                IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS,
+                jobDirectory.toPath() );
+
         SlurmJobMonitor slurmJobMonitor = new SlurmJobMonitor( logger );
-        slurmJobMonitor.monitorJobProgress( jobFutures, 3, 0 );
+
+        slurmJobMonitor.monitorJobProgress(
+                jobFutures,
+                3,
+                0 );
 
     }
 

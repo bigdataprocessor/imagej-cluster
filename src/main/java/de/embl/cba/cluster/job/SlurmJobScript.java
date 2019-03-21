@@ -32,7 +32,8 @@ public class SlurmJobScript implements JobScript
         lines.add( "#SBATCH -e " + sshExecutorService.getJobErrPath( jobID ) );
         lines.add( "#SBATCH -o " + sshExecutorService.getJobOutPath( jobID ) );
         lines.add( "#SBATCH -N 1" );
-        lines.add( "#SBATCH -n " + jobSettings.numWorkersPerNode );
+        lines.add( "#SBATCH -n 1" );
+        lines.add( "#SBATCH -c " + jobSettings.numWorkersPerNode );
         lines.add( "#SBATCH --mem " + jobSettings.memoryPerJobInMegaByte );
         lines.add( "#SBATCH -p " + jobSettings.queue );
         lines.add( "#SBATCH -t " + jobSettings.timePerJobInMinutes );
