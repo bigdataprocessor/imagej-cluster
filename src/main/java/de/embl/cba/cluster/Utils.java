@@ -1,7 +1,7 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.cluster.log.IJLazySwingLogger;
-import de.embl.cba.cluster.log.Logger;
+import de.embl.cba.log.IJLazySwingLogger;
+import de.embl.cba.log.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -9,7 +9,6 @@ import java.util.Date;
 
 public abstract class Utils
 {
-
     public static Logger logger = new IJLazySwingLogger();
 
     static String timeStamp()

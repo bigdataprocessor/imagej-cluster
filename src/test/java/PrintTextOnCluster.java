@@ -1,6 +1,6 @@
 import de.embl.cba.cluster.*;
 import de.embl.cba.cluster.commands.PrintTextCommand;
-import de.embl.cba.cluster.log.IJLazySwingLogger;
+import de.embl.cba.log.IJLazySwingLogger;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;

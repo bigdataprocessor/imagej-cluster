@@ -1,6 +1,6 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.cluster.log.Logger;
+import de.embl.cba.log.Logger;
 
 import java.util.ArrayList;
 
