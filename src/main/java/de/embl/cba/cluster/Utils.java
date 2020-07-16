@@ -1,8 +1,7 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.utils.logging.IJLazySwingLogger;
-import de.embl.cba.utils.logging.Logger;
-
+import de.embl.cba.cluster.log.IJLazySwingLogger;
+import de.embl.cba.cluster.log.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

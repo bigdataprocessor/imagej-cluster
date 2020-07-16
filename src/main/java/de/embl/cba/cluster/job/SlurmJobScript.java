@@ -53,7 +53,8 @@ public class SlurmJobScript implements JobScript
             }
 
             lines.add( "date" );
-            lines.add( "echo \"" + executableCommand + "\"" );
+            final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
+            lines.add( "echo \"" + printableCommand + "\"" );
             lines.add( executableCommand );
         }
 

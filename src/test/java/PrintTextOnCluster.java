@@ -1,10 +1,6 @@
-import de.embl.cba.cluster.ImageJCommandsSubmitter;
-import de.embl.cba.cluster.JobFuture;
-import de.embl.cba.cluster.JobSettings;
-import de.embl.cba.cluster.SlurmJobMonitor;
+import de.embl.cba.cluster.*;
 import de.embl.cba.cluster.commands.PrintTextCommand;
-import de.embl.cba.utils.fileutils.PathMapper;
-import de.embl.cba.utils.logging.IJLazySwingLogger;
+import de.embl.cba.cluster.log.IJLazySwingLogger;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;
