@@ -219,12 +219,11 @@ public class SSHConnector
     {
         try
         {
-            Utils.logger.info( "# Saving remote file:" + directory + "/" + filename );
+            Utils.logger.info( "Saving remote file:\n" + directory + "/" + filename );
 
             connectChannelSftp();
             channelSftp.cd( directory );
             channelSftp.put( asInputStream( text ), filename );
-
         }
         catch ( SftpException e )
         {
@@ -234,8 +233,6 @@ public class SSHConnector
         {
             e.printStackTrace();
         }
-
-
     }
 
     public void rename( String oldPath, String newPath )

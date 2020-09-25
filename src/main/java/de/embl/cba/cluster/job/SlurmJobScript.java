@@ -11,7 +11,6 @@ import java.util.ArrayList;
  */
 public class SlurmJobScript implements JobScript
 {
-
     private final JobSettings jobSettings;
     public static final String XVFB_ERR_PATH = "XVFB_ERR_PATH";
 
@@ -25,7 +24,6 @@ public class SlurmJobScript implements JobScript
 
     public String getJobText( SSHExecutorService sshExecutorService, String jobID )
     {
-
         ArrayList < String > lines = new ArrayList< >(  );
 
         lines.add( "#!/bin/bash" );

@@ -73,6 +73,7 @@ public class ImageJCommandsSubmitter
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
+            finalCommands.add( "echo $SLURM_JOB_ID");
             finalCommands.add( "hostname" );
             finalCommands.add( "lscpu" );
             finalCommands.add( "free -m" );
@@ -86,7 +87,6 @@ public class ImageJCommandsSubmitter
 
             finalCommands.add( "cp /g/almf/software/Fiji.app/IJ_Prefs.txt ~/.imagej/" );
             finalCommands.add( "sleep 1s" );
-
         }
 
         for ( String command : commands )
@@ -97,9 +97,21 @@ public class ImageJCommandsSubmitter
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            finalCommands.add( "ELAPSED_TIME=$(($SECONDS - $START_TIME))" );
-            finalCommands.add( "echo \"Elapsed time [s]:\"" );
-            finalCommands.add( "echo $ELAPSED_TIME" );
+            /**
+             * TODO: make this more pretty, currently the output is:
+             *
+             * Fri Sep 25 09:48:56 CEST 2020
+             * ELAPSED_TIME=$\(\(15 - 0\)\)
+             * Fri Sep 25 09:48:56 CEST 2020
+             * echo Elapsed time [s]:
+             * Elapsed time [s]:
+             * Fri Sep 25 09:48:56 CEST 2020
+             * echo 15
+             * 15
+             *
+             */
+            finalCommands.add( "ELAPSED_TIME_IN_SECONDS=$(($SECONDS - $START_TIME))" );
+            finalCommands.add( "echo $ELAPSED_TIME_IN_SECONDS" );
         }
 
         JobScript jobScript = createJobScript( finalCommands, jobSettings );

@@ -63,4 +63,10 @@ public abstract class Commands
         logService.info( "Quitting ImageJ" );
         System.exit( 0 );
     }
+
+    public static void quitImageJ( )
+    {
+        System.out.println( "Quitting ImageJ" );
+        System.exit( 0 );
+    }
 }

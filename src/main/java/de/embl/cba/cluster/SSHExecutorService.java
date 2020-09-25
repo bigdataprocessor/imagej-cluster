@@ -172,7 +172,7 @@ public class SSHExecutorService implements ExecutorService
     {
         try
         {
-            Utils.logger.info( "Creating remote directory: " + jobDirectory );
+            Utils.logger.info( "Creating remote directory:\n" + jobDirectory );
             sshConnector.executeCommand( makeRemoteDirectoryCommand + jobDirectory );
         }
         catch ( Exception e )

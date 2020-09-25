@@ -61,7 +61,6 @@ public class RotateImageCommand implements Command
 
     public void run()
     {
-
         logService.info( "# " + PLUGIN_NAME );
 
         getData();
@@ -73,7 +72,6 @@ public class RotateImageCommand implements Command
         logService.info( "Done in command." );
 
         return;
-
     }
 
 

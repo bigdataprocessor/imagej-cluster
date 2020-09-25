@@ -71,7 +71,6 @@ public class PrintTextOnCluster implements Command
 
     }
 
-
     private ArrayList< JobFuture > submitJobsOnSlurm( String imageJ, Path jobDirectory )
     {
 
