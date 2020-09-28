@@ -253,7 +253,6 @@ public class SSHExecutorService implements ExecutorService
 
     private String getJobID()
     {
-
         String jobID = String.format( "%05d", numJobsSubmitted );
         
         numJobsSubmitted++;

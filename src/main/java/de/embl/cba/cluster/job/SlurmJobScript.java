@@ -72,7 +72,5 @@ public class SlurmJobScript implements JobScript
         lines.add( sshExecutorService.getJobFinishedCommand( jobID ) );
 
         return String.join( "\n", lines );
-
     }
-
 }

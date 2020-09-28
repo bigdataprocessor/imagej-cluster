@@ -244,7 +244,6 @@ public class SSHConnector
             connectChannelSftp();
 
             channelSftp.rename( oldPath, newPath  );
-
         }
         catch ( SftpException e )
         {

@@ -17,8 +17,15 @@ public class JobSubmitter
     public static final String EXECUTION_SYSTEM_EMBL_SLURM = "EMBL Slurm Cluster";
     public static final String EXECUTION_SYSTEM_MAC_OS_LOCALHOST = "MacOS localhost";
 
+
+    public static final String RUN_IJ_MACRO_OPTIONS = " --mem=MEMORY_MB --ij2 --allow-multiple --headless --eval";
+    public static final String RUN_IJ_COMMAND_OPTIONS = " --mem=MEMORY_MB --ij2 --allow-multiple --headless --run";
+
     public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a -e XVFB_ERR_PATH /g/almf/software/Fiji.app/ImageJ-linux64 --allow-multiple --mem=MEMORY_MB --run";
-    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --ij2 --allow-multiple --headless --run";
+
+    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS = "/g/almf/software/Fiji.app/ImageJ-linux64" + RUN_IJ_COMMAND_OPTIONS;
+    public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS_MACRO = "/g/almf/software/Fiji.app/ImageJ-linux64 " + RUN_IJ_MACRO_OPTIONS;
+
     public static final String IMAGEJ_EXECUTABLE_CBA_CLUSTER_XVFB = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --allow-multiple --run";
     public static final String IMAGEJ_EXECUTABLE_MAC_OS = "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --mem=MEMORY_MB --allow-multiple --run";
 
@@ -57,6 +64,14 @@ public class JobSubmitter
         String commandAndParameters = Commands.createCommandAndParameterString( command, parameters );
         String ijBinaryAndCommandAndParameters = prependIJBinary( commandAndParameters );
         commands.add( ijBinaryAndCommandAndParameters );
+    }
+
+    public void addIJMacroExecution( String macroString )
+    {
+        String quotedMacroString = " \'" + macroString + "\'";
+        String ijExecutableAndMacroString = prependIJBinary( quotedMacroString );
+        System.out.println( ijExecutableAndMacroString );
+        commands.add( ijExecutableAndMacroString );
     }
 
     public void addLinuxCommand( String command )
@@ -172,5 +187,4 @@ public class JobSubmitter
     {
         return remoteImageJExectuable + " " + command ;
     }
-
 }

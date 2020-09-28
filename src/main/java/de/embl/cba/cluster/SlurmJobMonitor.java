@@ -3,6 +3,7 @@ package de.embl.cba.cluster;
 import de.embl.cba.log.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SlurmJobMonitor
 {
@@ -14,7 +15,7 @@ public class SlurmJobMonitor
         this.logger = logger;
     }
 
-    public void monitorJobProgress( ArrayList< JobFuture > jobFutures, int monitoringIntervalInSeconds, int maxNumResubmissions )
+    public void monitorJobProgress( List< JobFuture > jobFutures, int monitoringIntervalInSeconds, int maxNumResubmissions )
     {
         currentStatus = new Status();
 
@@ -85,7 +86,7 @@ public class SlurmJobMonitor
         }
     }
 
-    private void logJobStati( ArrayList< JobFuture > jobFutures, Status status )
+    private void logJobStati( List< JobFuture > jobFutures, Status status )
     {
         logger.info( " " );
         logger.info( "# Current job status summary" );

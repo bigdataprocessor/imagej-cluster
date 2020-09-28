@@ -12,7 +12,7 @@ public abstract class Commands
     {
         String command = addImageJExecutable( ImageJcmd );
 
-        command = addPluginName( pluginName, command );
+        command = addCommandName( pluginName, command );
 
         command = addParameters( parameters, command );
 
@@ -24,14 +24,14 @@ public abstract class Commands
     {
         String fullCommand = "";
 
-        fullCommand = addPluginName( command, "" );
+        fullCommand = addCommandName( command, "" );
 
         fullCommand = addParameters( parameters, fullCommand );
 
         return fullCommand;
     }
 
-    private static String addPluginName( String pluginName, String command )
+    private static String addCommandName( String pluginName, String command )
     {
         command += " \"" + pluginName + "\"";
         return command;

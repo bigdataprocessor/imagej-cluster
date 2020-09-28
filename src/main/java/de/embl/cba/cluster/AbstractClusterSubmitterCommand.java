@@ -7,6 +7,7 @@ import org.scijava.widget.TextWidget;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractClusterSubmitterCommand implements Command
 {
@@ -30,29 +31,29 @@ public abstract class AbstractClusterSubmitterCommand implements Command
 
     @Parameter( label = "Maximum number of failed job resubmissions" )
     protected int maxNumResubmissions = 0;
-    private JobSubmitter jobSubmitter;
-    private SlurmJobMonitor jobMonitor;
-    private ArrayList< JobFuture > jobFutures;
 
+    protected JobSubmitter jobSubmitter;
+    protected SlurmJobMonitor jobMonitor;
+    protected ArrayList< JobFuture > jobFutures;
 
     /**
-     * createJobSubmitter();
+     * createJobSubmitter( exectuable );
      * jobFutures = submitJobsOnSlurm( ... );
      * monitorJobs( jobFutures );
      */
 
-    private void monitorJobs( ArrayList< JobFuture > jobFutures )
+    protected void monitorJobs( List< JobFuture > jobFutures )
     {
         jobMonitor = new SlurmJobMonitor( new IJLazySwingLogger() );
         jobMonitor.monitorJobProgress( jobFutures, jobStatusMonitoringInterval, maxNumResubmissions );
     }
 
-    private void createJobSubmitter()
+    protected void createJobSubmitter( String executableWithOptions )
     {
         jobSubmitter = new JobSubmitter(
                 JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
                 new File ( jobDirectory, userName ).toString(),
-                executable.toString(),
+                executableWithOptions,
                 userName,
                 password );
     }
