@@ -34,8 +34,13 @@ public class SlurmJobScript implements JobScript
         lines.add( "#SBATCH -n 1" );
         lines.add( "#SBATCH -c " + jobSettings.numWorkersPerNode );
         lines.add( "#SBATCH --mem " + jobSettings.memoryPerJobInMegaByte );
-        lines.add( "#SBATCH -p " + jobSettings.queue );
-        lines.add( "#SBATCH -t " + jobSettings.timePerJobInMinutes );
+        //lines.add( "#SBATCH -p " + jobSettings.queue );
+
+        int time = jobSettings.timePerJobInMinutes;
+        int hours = time / 60;
+        int minutes = time % 60;
+
+        lines.add( "#SBATCH -t " + String.format( "%02d", hours ) + ":" + String.format( "%02d", minutes ) + ":00");
 
         lines.add( "ulimit -c 0" );
 
@@ -57,8 +62,10 @@ public class SlurmJobScript implements JobScript
             // potentially echo the command
             if ( ! executableCommand.contains( DO_NOT_ECHO ) )
             {
-                final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
-                lines.add( "echo \"" + printableCommand + "\"" );
+//				final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
+//                final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
+                String noSingleQuotes = executableCommand.replace( "'", "SINGLEQUOTE" );
+                lines.add( "echo \'" + noSingleQuotes + "\'" );
             }
             else
             {

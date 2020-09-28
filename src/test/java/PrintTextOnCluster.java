@@ -61,9 +61,9 @@ public class PrintTextOnCluster implements Command
                 IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS,
                 jobDirectory.toPath() );
 
-        SlurmJobMonitor slurmJobMonitor = new SlurmJobMonitor( logger );
+        JobMonitor jobMonitor = new JobMonitor( logger );
 
-        slurmJobMonitor.monitorJobProgress(
+        jobMonitor.monitorJobProgress(
                 jobFutures,
                 3,
                 0 );
@@ -83,7 +83,7 @@ public class PrintTextOnCluster implements Command
         {
             commandsSubmitter.clearCommands();
             setCommandAndParameterStrings( commandsSubmitter, inputText );
-            jobFutures.add( commandsSubmitter.submitJobs( jobSettings ) );
+            jobFutures.add( commandsSubmitter.submitJob( jobSettings ) );
 
             try
             {

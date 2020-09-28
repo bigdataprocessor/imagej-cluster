@@ -137,7 +137,7 @@ public class RotateImageDemo implements Command
         jobSettings.memoryPerJobInMegaByte = 16000;
         jobSettings.numWorkersPerNode = 4;
         jobSettings.queue = JobSettings.DEFAULT_QUEUE;
-        future = commandsSubmitter.submitJobs( jobSettings );
+        future = commandsSubmitter.submitJob( jobSettings );
 
         return future;
     }
@@ -157,7 +157,7 @@ public class RotateImageDemo implements Command
         jobSettings.memoryPerJobInMegaByte = 16000;
         jobSettings.numWorkersPerNode = 4;
         jobSettings.queue = JobSettings.DEFAULT_QUEUE;
-        return commandsSubmitter.submitJobs( jobSettings );
+        return commandsSubmitter.submitJob( jobSettings );
     }
 
 

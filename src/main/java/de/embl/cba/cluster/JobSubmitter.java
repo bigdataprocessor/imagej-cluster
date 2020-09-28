@@ -17,8 +17,7 @@ public class JobSubmitter
     public static final String EXECUTION_SYSTEM_EMBL_SLURM = "EMBL Slurm Cluster";
     public static final String EXECUTION_SYSTEM_MAC_OS_LOCALHOST = "MacOS localhost";
 
-
-    public static final String RUN_IJ_MACRO_OPTIONS = " --mem=MEMORY_MB --ij2 --allow-multiple --headless --eval";
+    public static final String RUN_IJ_MACRO_OPTIONS = " --mem=MEMORY_MB --ij2 --allow-multiple --headless -eval";
     public static final String RUN_IJ_COMMAND_OPTIONS = " --mem=MEMORY_MB --ij2 --allow-multiple --headless --run";
 
     public static final String IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB = "xvfb-run -a -e XVFB_ERR_PATH /g/almf/software/Fiji.app/ImageJ-linux64 --allow-multiple --mem=MEMORY_MB --run";
@@ -86,7 +85,7 @@ public class JobSubmitter
      * @param jobSettings
      * @return
      */
-    public JobFuture submitJobs( JobSettings jobSettings )
+    public JobFuture submitJob( JobSettings jobSettings )
     {
         ArrayList< String > finalCommands = new ArrayList<>();
 

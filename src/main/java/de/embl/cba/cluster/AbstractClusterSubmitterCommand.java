@@ -33,7 +33,7 @@ public abstract class AbstractClusterSubmitterCommand implements Command
     protected int maxNumResubmissions = 0;
 
     protected JobSubmitter jobSubmitter;
-    protected SlurmJobMonitor jobMonitor;
+    protected JobMonitor jobMonitor;
     protected ArrayList< JobFuture > jobFutures;
 
     /**
@@ -44,7 +44,7 @@ public abstract class AbstractClusterSubmitterCommand implements Command
 
     protected void monitorJobs( List< JobFuture > jobFutures )
     {
-        jobMonitor = new SlurmJobMonitor( new IJLazySwingLogger() );
+        jobMonitor = new JobMonitor( new IJLazySwingLogger() );
         jobMonitor.monitorJobProgress( jobFutures, jobStatusMonitoringInterval, maxNumResubmissions );
     }
 

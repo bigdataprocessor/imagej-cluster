@@ -22,7 +22,7 @@ public class JobFuture implements Future
 
     public static final String XVFB_ERROR_01 = "xvfb-run";
     public static final String XVFB_ERROR_02 = "SocketCreateListener";
-    public static final String SLURM_TIME_LIMIT_ERROR = "DUE TO TIME LIMIT";
+    public static final String SLURM_TIME_LIMIT_ERROR = "time_limit";
     public static final String SLURM_STEP_ERROR = "slurmstepd";
     public static final String JVM_WARNING = "VM warning";
     public static final String HDF5_ERROR = "hdf5";
@@ -89,7 +89,6 @@ public class JobFuture implements Future
 
     public void refreshStatus()
     {
-
         if ( currentStatus.equals( FINISHED ) )
         {
             return;

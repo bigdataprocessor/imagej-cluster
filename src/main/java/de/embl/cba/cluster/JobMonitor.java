@@ -5,18 +5,20 @@ import de.embl.cba.log.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SlurmJobMonitor
+public class JobMonitor
 {
     Logger logger;
     Status currentStatus;
+    private List< JobFuture > jobFutures;
 
-    public SlurmJobMonitor( Logger logger )
+    public JobMonitor( Logger logger )
     {
         this.logger = logger;
     }
 
     public void monitorJobProgress( List< JobFuture > jobFutures, int monitoringIntervalInSeconds, int maxNumResubmissions )
     {
+        this.jobFutures = jobFutures;
         currentStatus = new Status();
 
         while ( ( currentStatus.numFinished + currentStatus.numFailed ) < jobFutures.size() )
@@ -58,15 +60,10 @@ public class SlurmJobMonitor
                 {
                     currentStatus.numFinished++;
                 }
-
             }
-
             logJobStati( jobFutures, currentStatus );
-
         }
-
         finalReport( currentStatus );
-
     }
 
     private void sleep( int monitoringIntervalInSeconds )
@@ -76,6 +73,11 @@ public class SlurmJobMonitor
 
     private void finalReport( Status status )
     {
+        for ( JobFuture jobFuture : jobFutures )
+        {
+            // jobFuture.getOutput() TODO: provide some more information.
+        }
+
         if ( status.numFailed > 0 )
         {
             logger.info( "All jobs finished (some have failed)." );
