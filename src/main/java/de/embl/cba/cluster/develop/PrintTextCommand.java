@@ -1,22 +1,11 @@
-package de.embl.cba.cluster.commands;
+package de.embl.cba.cluster.develop;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.io.FileSaver;
-import net.imagej.DatasetService;
 import net.imagej.legacy.IJ1Helper;
-import net.imagej.ops.OpService;
-import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.thread.ThreadService;
-import org.scijava.ui.UIService;
-import org.scijava.widget.FileWidget;
 import net.imagej.legacy.LegacyService;
-
-import java.io.File;
 
 @Plugin(type = Command.class, menuPath = "Plugins>Sandbox>Print text")
 public class PrintTextCommand implements Command

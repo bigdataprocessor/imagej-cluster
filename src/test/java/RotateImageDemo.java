@@ -1,7 +1,7 @@
-import de.embl.cba.cluster.ImageJCommandsSubmitter;
+import de.embl.cba.cluster.JobSubmitter;
 import de.embl.cba.cluster.JobFuture;
 import de.embl.cba.cluster.JobSettings;
-import de.embl.cba.cluster.commands.RotateImageCommand;
+import de.embl.cba.cluster.develop.RotateImageCommand;
 import ij.IJ;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
@@ -125,10 +125,10 @@ public class RotateImageDemo implements Command
     private Future submitOnLocalMac( String pluginName, Map< String, Object > parameters )
     {
         Future future;
-        ImageJCommandsSubmitter commandsSubmitter = new ImageJCommandsSubmitter(
-                        ImageJCommandsSubmitter.EXECUTION_SYSTEM_MAC_OS_LOCALHOST,
+        JobSubmitter commandsSubmitter = new JobSubmitter(
+                        JobSubmitter.EXECUTION_SYSTEM_MAC_OS_LOCALHOST,
                         "/Users/tischer/Documents/tmp",
-                        ImageJCommandsSubmitter.IMAGEJ_EXECUTABLE_MAC_OS,
+                        JobSubmitter.IMAGEJ_EXECUTABLE_MAC_OS,
                         "tischer", password );
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
@@ -137,7 +137,7 @@ public class RotateImageDemo implements Command
         jobSettings.memoryPerJobInMegaByte = 16000;
         jobSettings.numWorkersPerNode = 4;
         jobSettings.queue = JobSettings.DEFAULT_QUEUE;
-        future = commandsSubmitter.submitCommands( jobSettings );
+        future = commandsSubmitter.submitJobs( jobSettings );
 
         return future;
     }
@@ -145,10 +145,10 @@ public class RotateImageDemo implements Command
     private Future submitOnEmblSlurm( String pluginName, Map< String, Object > parameters )
     {
 
-        ImageJCommandsSubmitter commandsSubmitter = new ImageJCommandsSubmitter(
-            ImageJCommandsSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
+        JobSubmitter commandsSubmitter = new JobSubmitter(
+            JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
             "/g/cba/cluster/tischer",
-            ImageJCommandsSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB,
+            JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB,
             "tischer", password );
 
         commandsSubmitter.addIJCommandWithParameters( pluginName, parameters );
@@ -157,7 +157,7 @@ public class RotateImageDemo implements Command
         jobSettings.memoryPerJobInMegaByte = 16000;
         jobSettings.numWorkersPerNode = 4;
         jobSettings.queue = JobSettings.DEFAULT_QUEUE;
-        return commandsSubmitter.submitCommands( jobSettings );
+        return commandsSubmitter.submitJobs( jobSettings );
     }
 
 

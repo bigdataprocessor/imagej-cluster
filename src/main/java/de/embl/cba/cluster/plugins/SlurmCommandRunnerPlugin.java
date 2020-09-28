@@ -1,6 +1,5 @@
 package de.embl.cba.cluster.plugins;
 
-import de.embl.cba.cluster.ImageJCommandsSubmitter;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;

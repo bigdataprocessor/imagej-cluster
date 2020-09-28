@@ -1,7 +1,5 @@
-package de.embl.cba.cluster.commands;
+package de.embl.cba.cluster.develop;
 
-import ij.IJ;
-import ij.ImageJ;
 import org.scijava.log.LogService;
 
 import java.util.Iterator;

@@ -1,6 +1,6 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.cluster.commands.Commands;
+import de.embl.cba.cluster.develop.Commands;
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.job.SimpleLinuxJobScript;
 import de.embl.cba.cluster.job.SlurmJobScript;
@@ -9,9 +9,10 @@ import de.embl.cba.cluster.ssh.SSHConnectorConfig;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
-public class ImageJCommandsSubmitter
+import static de.embl.cba.cluster.job.SlurmJobScript.DO_NOT_ECHO;
+
+public class JobSubmitter
 {
     public static final String EXECUTION_SYSTEM_EMBL_SLURM = "EMBL Slurm Cluster";
     public static final String EXECUTION_SYSTEM_MAC_OS_LOCALHOST = "MacOS localhost";
@@ -31,11 +32,11 @@ public class ImageJCommandsSubmitter
     private ArrayList< String > commands;
     private SSHExecutorService sshExecutorService;
 
-    public ImageJCommandsSubmitter( String executionSystem,
-                                    String remoteJobDirectory,
-                                    String remoteImageJExectuable,
-                                    String username,
-                                    String password )
+    public JobSubmitter( String executionSystem,
+                         String remoteJobDirectory,
+                         String remoteImageJExectuable,
+                         String username,
+                         String password )
     {
         this.executionSystem = executionSystem;
         this.remoteImageJExectuable = remoteImageJExectuable;
@@ -44,9 +45,7 @@ public class ImageJCommandsSubmitter
         this.remoteJobDirectory = remoteJobDirectory;
 
         commands = new ArrayList<>();
-
     }
-
 
     public void clearCommands()
     {
@@ -65,19 +64,24 @@ public class ImageJCommandsSubmitter
         commands.add( command );
     }
 
-
-    public JobFuture submitCommands( JobSettings jobSettings )
+    /**
+     *
+     *
+     *
+     * @param jobSettings
+     * @return
+     */
+    public JobFuture submitJobs( JobSettings jobSettings )
     {
-
         ArrayList< String > finalCommands = new ArrayList<>();
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            finalCommands.add( "echo $SLURM_JOB_ID");
+            finalCommands.add( "echo $SLURM_JOB_ID" + DO_NOT_ECHO);
             finalCommands.add( "hostname" );
             finalCommands.add( "lscpu" );
             finalCommands.add( "free -m" );
-            finalCommands.add( "START_TIME=$SECONDS" );
+            finalCommands.add( "START_TIME=$SECONDS"  + DO_NOT_ECHO );
 
             finalCommands.add( "module load Java" );
             finalCommands.add( "module load X11" );
@@ -97,21 +101,8 @@ public class ImageJCommandsSubmitter
 
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
-            /**
-             * TODO: make this more pretty, currently the output is:
-             *
-             * Fri Sep 25 09:48:56 CEST 2020
-             * ELAPSED_TIME=$\(\(15 - 0\)\)
-             * Fri Sep 25 09:48:56 CEST 2020
-             * echo Elapsed time [s]:
-             * Elapsed time [s]:
-             * Fri Sep 25 09:48:56 CEST 2020
-             * echo 15
-             * 15
-             *
-             */
-            finalCommands.add( "ELAPSED_TIME_IN_SECONDS=$(($SECONDS - $START_TIME))" );
-            finalCommands.add( "echo $ELAPSED_TIME_IN_SECONDS" );
+            finalCommands.add( "ELAPSED_TIME_IN_SECONDS=$(($SECONDS - $START_TIME))" + DO_NOT_ECHO );
+            finalCommands.add( "echo $ELAPSED_TIME_IN_SECONDS" + DO_NOT_ECHO );
         }
 
         JobScript jobScript = createJobScript( finalCommands, jobSettings );
@@ -131,7 +122,6 @@ public class ImageJCommandsSubmitter
 
     private SSHExecutorService getSSHExecutorService()
     {
-
         if ( sshExecutorService == null )
         {
             String hostname = "";

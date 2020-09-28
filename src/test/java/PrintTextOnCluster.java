@@ -1,5 +1,5 @@
 import de.embl.cba.cluster.*;
-import de.embl.cba.cluster.commands.PrintTextCommand;
+import de.embl.cba.cluster.develop.PrintTextCommand;
 import de.embl.cba.log.IJLazySwingLogger;
 import net.imagej.ImageJ;
 import org.scijava.command.Command;
@@ -11,12 +11,11 @@ import org.scijava.widget.TextWidget;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.embl.cba.cluster.ImageJCommandsSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS;
+import static de.embl.cba.cluster.JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS;
 
 /* Simple test, just printing text onto command line */
 
@@ -74,7 +73,7 @@ public class PrintTextOnCluster implements Command
     private ArrayList< JobFuture > submitJobsOnSlurm( String imageJ, Path jobDirectory )
     {
 
-        ImageJCommandsSubmitter commandsSubmitter = getImageJCommandsSubmitter( imageJ, jobDirectory );
+        JobSubmitter commandsSubmitter = getImageJCommandsSubmitter( imageJ, jobDirectory );
 
         JobSettings jobSettings = getJobSettings();
 
@@ -84,7 +83,7 @@ public class PrintTextOnCluster implements Command
         {
             commandsSubmitter.clearCommands();
             setCommandAndParameterStrings( commandsSubmitter, inputText );
-            jobFutures.add( commandsSubmitter.submitCommands( jobSettings ) );
+            jobFutures.add( commandsSubmitter.submitJobs( jobSettings ) );
 
             try
             {
@@ -109,17 +108,17 @@ public class PrintTextOnCluster implements Command
         return jobSettings;
     }
 
-    private ImageJCommandsSubmitter getImageJCommandsSubmitter( String imageJ, Path jobDirectory )
+    private JobSubmitter getImageJCommandsSubmitter( String imageJ, Path jobDirectory )
     {
-        return new ImageJCommandsSubmitter(
-                ImageJCommandsSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
+        return new JobSubmitter(
+                JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
                 PathMapper.asEMBLClusterMounted( jobDirectory.toString() ),
                 imageJ,
                 username,
                 password );
     }
 
-    private void setCommandAndParameterStrings( ImageJCommandsSubmitter commandsSubmitter, String text )
+    private void setCommandAndParameterStrings( JobSubmitter commandsSubmitter, String text )
     {
         Map< String, Object > parameters = new HashMap<>();
         parameters.clear();

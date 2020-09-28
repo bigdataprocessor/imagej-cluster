@@ -7,7 +7,7 @@
 		<version>29.2.1</version>
 	</parent>
 	<groupId>de.embl.cba</groupId>
-	<artifactId>fiji-slurm</artifactId>
+	<artifactId>imagej-cluster</artifactId>
 	<version>0.6.3-SNAPSHPOT</version>
 <!--	<build>-->
 <!--		<plugins>-->
@@ -24,8 +24,8 @@
 <!--			</plugin>-->
 <!--		</plugins>-->
 <!--	</build>-->
-	<name>Fiji Slurm</name>
-	<description>Running Fiji on Slurm cluster</description>
+	<name>ImageJ Cluster</name>
+	<description>Submitting and monitoring ImageJ Jobs on a comuputer cluster</description>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>EMBL</name>

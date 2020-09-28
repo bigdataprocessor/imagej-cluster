@@ -11,6 +11,7 @@ import java.util.ArrayList;
  */
 public class SlurmJobScript implements JobScript
 {
+    public static final String DO_NOT_ECHO = " # Do not print";
     private final JobSettings jobSettings;
     public static final String XVFB_ERR_PATH = "XVFB_ERR_PATH";
 
@@ -50,9 +51,21 @@ public class SlurmJobScript implements JobScript
                 executableCommand = executableCommand.replace(  XVFB_ERR_PATH, sshExecutorService.getJobXvfbErrPath( jobID ) );
             }
 
+            // execution time of the command
             lines.add( "date" );
-            final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
-            lines.add( "echo \"" + printableCommand + "\"" );
+
+            // potentially echo the command
+            if ( ! executableCommand.contains( DO_NOT_ECHO ) )
+            {
+                final String printableCommand = executableCommand.replace( "(", "\\(" ).replace( ")", "\\)" );
+                lines.add( "echo \"" + printableCommand + "\"" );
+            }
+            else
+            {
+                executableCommand = executableCommand.replace( DO_NOT_ECHO, "" );
+            }
+
+            // add the actual command
             lines.add( executableCommand );
         }
 
