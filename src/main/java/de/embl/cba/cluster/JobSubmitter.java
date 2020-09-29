@@ -116,7 +116,7 @@ public class JobSubmitter
         if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
         {
             finalCommands.add( "ELAPSED_TIME_IN_SECONDS=$(($SECONDS - $START_TIME))" + DO_NOT_ECHO );
-            finalCommands.add( "echo $ELAPSED_TIME_IN_SECONDS" + DO_NOT_ECHO );
+            finalCommands.add( "echo \"Time spent in seconds $ELAPSED_TIME_IN_SECONDS\"" + DO_NOT_ECHO );
         }
 
         JobScript jobScript = createJobScript( finalCommands, jobSettings );

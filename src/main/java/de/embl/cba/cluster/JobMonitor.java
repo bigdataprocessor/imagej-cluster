@@ -23,6 +23,7 @@ public class JobMonitor
 
         while ( ( currentStatus.numFinished + currentStatus.numFailed ) < jobFutures.size() )
         {
+            logger.info( "Waiting for " + monitoringIntervalInSeconds + " seconds until providing an update on your jobs." );
             sleep( monitoringIntervalInSeconds );
 
             currentStatus.numRunning = 0;

@@ -86,7 +86,6 @@ public class JobFuture implements Future
         }
     }
 
-
     public void refreshStatus()
     {
         if ( currentStatus.equals( FINISHED ) )
@@ -120,9 +119,7 @@ public class JobFuture implements Future
                 currentStatus = ERROR;
                 statusHistory += "-" + error + "_" + ERROR;
             }
-
         }
-
     }
 
     public String getStatusHistory()
@@ -151,7 +148,6 @@ public class JobFuture implements Future
             return false;
         }
     }
-
 
     public String checkForErrors()
     {

@@ -247,10 +247,9 @@ public class SSHConnector
         }
         catch ( SftpException e )
         {
-            Utils.logger.warning( e.toString() );
+            Utils.logger.warning( "Exception during renaming of file: " + oldPath + "; " + e.toString() );
         }
     }
-
 
     public String readRemoteTextFileUsingSFTP( String remoteDirectory, String remoteFileName )
     {
@@ -265,7 +264,6 @@ public class SSHConnector
             String text = asString( inputStream, channelSftp );
 
             return text;
-
         }
         catch ( IOException e )
         {
