@@ -1,6 +1,5 @@
 package de.embl.cba.cluster;
 
-import de.embl.cba.cluster.develop.Commands;
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.job.SimpleLinuxJobScript;
 import de.embl.cba.cluster.job.SlurmJobScript;
@@ -184,6 +183,6 @@ public class JobSubmitter
 
     private String prependIJBinary( String command )
     {
-        return remoteImageJExectuable + " " + command ;
+        return "time " + remoteImageJExectuable + " " + command ;
     }
 }

@@ -248,6 +248,9 @@ public class SSHExecutorService implements ExecutorService
     {
         String jobText = jobScript.getJobText( this, jobID );
         sshConnector.saveTextAsFileOnRemoteServerUsingSFTP( jobText, jobDirectory, getJobFilename( jobID ) );
+        Utils.logger.info( "Output file:\n" + jobDirectory + "/" + getJobOutFilename( jobID ) );
+        Utils.logger.info( "Error file:\n" + jobDirectory + "/" + getJobErrFilename( jobID ) );
+
         //sshConnector.executeCommand( makeScriptExecutableCommand + jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID ) );
     }
 

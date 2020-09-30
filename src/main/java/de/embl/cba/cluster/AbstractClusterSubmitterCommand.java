@@ -24,13 +24,13 @@ public abstract class AbstractClusterSubmitterCommand implements Command
     protected String password;
 
     @Parameter( label = "Number of CPUs per job" )
-    protected int numWorkers = 1;
+    protected int numWorkers = 8;
 
     @Parameter( label = "Job status monitoring interval [s]" )
     protected int jobStatusMonitoringInterval = 60;
 
     @Parameter( label = "Maximum number of failed job resubmissions" )
-    protected int maxNumResubmissions = 0;
+    protected int maxNumResubmissions = 2;
 
     protected JobSubmitter jobSubmitter;
     protected JobMonitor jobMonitor;

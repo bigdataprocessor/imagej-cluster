@@ -1,4 +1,4 @@
-package de.embl.cba.cluster.develop;
+package de.embl.cba.cluster;
 
 import org.scijava.log.LogService;
 

@@ -1,5 +1,6 @@
 package de.embl.cba.cluster.develop;
 
+import de.embl.cba.cluster.Commands;
 import net.imagej.legacy.IJ1Helper;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;

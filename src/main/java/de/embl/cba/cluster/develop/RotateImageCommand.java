@@ -1,5 +1,6 @@
 package de.embl.cba.cluster.develop;
 
+import de.embl.cba.cluster.Commands;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileSaver;
