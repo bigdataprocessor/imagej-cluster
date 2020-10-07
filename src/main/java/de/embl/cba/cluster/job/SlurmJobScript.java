@@ -34,7 +34,7 @@ public class SlurmJobScript implements JobScript
         lines.add( "#SBATCH -n 1" );
         lines.add( "#SBATCH -c " + jobSettings.numWorkersPerNode );
         lines.add( "#SBATCH --mem " + jobSettings.memoryPerJobInMegaByte );
-        //lines.add( "#SBATCH -p " + jobSettings.queue );
+        lines.add( "#SBATCH -p " + jobSettings.queue );
 
         int time = jobSettings.timePerJobInMinutes;
         int hours = time / 60;

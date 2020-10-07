@@ -1,6 +1,5 @@
 package de.embl.cba.cluster;
 
-import com.sun.org.apache.regexp.internal.RE;
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
@@ -12,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 
 public class JobFuture implements Future
 {
+    public static final String SLURM_ERROR = "slurm";
     SSHExecutorService executorService;
     String jobID;
     JobScript jobScript;
@@ -172,6 +172,10 @@ public class JobFuture implements Future
         else if ( err.contains( HDF5_ERROR) )
         {
             return HDF5_ERROR;
+        }
+        else if ( err.contains( SLURM_ERROR ) )
+        {
+            return SLURM_ERROR;
         }
         else if ( err.equals( SSHConnector.IO_EXCEPTION ) )
         {

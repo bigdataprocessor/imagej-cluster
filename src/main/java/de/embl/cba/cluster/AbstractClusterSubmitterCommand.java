@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class AbstractClusterSubmitterCommand implements Command
 {
     @Parameter( label = "Executable", required = false)
-    protected File executable = new File( JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS );
+    protected String executable = JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HEADLESS_MACRO;
 
     @Parameter( label = "Job directory", required = false)
     protected File jobDirectory = new File( "/g/cba/cluster/" );

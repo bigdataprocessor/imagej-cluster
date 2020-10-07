@@ -1,6 +1,7 @@
 package de.embl.cba.cluster;
 
 import de.embl.cba.log.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ public class JobMonitor
     Logger logger;
     Status currentStatus;
     private List< JobFuture > jobFutures;
+    private long startTimeMillis;
 
     public JobMonitor( Logger logger )
     {
@@ -18,6 +20,7 @@ public class JobMonitor
 
     public void monitorJobProgress( List< JobFuture > jobFutures, int monitoringIntervalInSeconds, int maxNumResubmissions )
     {
+        this.startTimeMillis = System.currentTimeMillis();
         this.jobFutures = jobFutures;
         currentStatus = new Status();
 
@@ -82,23 +85,39 @@ public class JobMonitor
         if ( status.numFailed > 0 )
         {
             logger.info( "All jobs finished (some have failed)." );
+            logger.info( getTimeMessage() );
         }
         else
         {
             logger.info( "All jobs finished." );
+            logger.info( getTimeMessage() );
         }
+
+        logger.info( "JobMonitor is done." );
     }
 
     private void logJobStati( List< JobFuture > jobFutures, Status status )
     {
         logger.info( " " );
         logger.info( "# Current job status summary" );
+        logger.info( getTimeMessage() );
         logger.info( "Submitted: " + jobFutures.size() );
         logger.info( "Started: " + status.numRunning );
         logger.info( "Finished: " + status.numFinished );
         logger.info( "Resubmitted: " + status.numResubmitted );
         logger.info( "Failed: " + status.numFailed );
         logger.info( " " );
+    }
+
+    @NotNull
+    private String getTimeMessage()
+    {
+        return "Time since start of monitoring [min]: " + getTimeSinceStartMinutes();
+    }
+
+    private int getTimeSinceStartMinutes()
+    {
+        return (int) ( Math.ceil( 1.0 * System.currentTimeMillis() - startTimeMillis ) / ( 60.0 * 1000) );
     }
 
     class Status

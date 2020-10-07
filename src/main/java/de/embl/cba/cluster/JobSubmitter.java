@@ -96,8 +96,8 @@ public class JobSubmitter
             finalCommands.add( "free -m" );
             finalCommands.add( "START_TIME=$SECONDS"  + DO_NOT_ECHO );
 
-            finalCommands.add( "module load Java" );
-            finalCommands.add( "module load X11" );
+            // finalCommands.add( "module load Java" );
+            // finalCommands.add( "module load X11" ); // only necessary when the job cannot run headless
 
             finalCommands.add( "mkdir -p ~/.imagej" );
             finalCommands.add( "sleep 1s" );
