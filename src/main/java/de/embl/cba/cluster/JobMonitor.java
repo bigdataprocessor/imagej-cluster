@@ -99,12 +99,12 @@ public class JobMonitor
     private void logJobStati( List< JobFuture > jobFutures, Status status )
     {
         logger.info( " " );
-        logger.info( "# Current job status summary" );
+        logger.info( "# Job status summary" );
         logger.info( getTimeMessage() );
         logger.info( "Submitted: " + jobFutures.size() );
-        logger.info( "Started: " + status.numRunning );
-        logger.info( "Finished: " + status.numFinished );
         logger.info( "Resubmitted: " + status.numResubmitted );
+        logger.info( "Running: " + status.numRunning );
+        logger.info( "Finished: " + status.numFinished );
         logger.info( "Failed: " + status.numFailed );
         logger.info( " " );
     }
