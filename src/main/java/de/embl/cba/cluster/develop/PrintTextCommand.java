@@ -1,12 +1,16 @@
 package de.embl.cba.cluster.develop;
 
 import de.embl.cba.cluster.Commands;
+import ij.CompositeImage;
 import net.imagej.legacy.IJ1Helper;
 import org.scijava.command.Command;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import net.imagej.legacy.LegacyService;
+
+import java.awt.*;
+import java.awt.image.IndexColorModel;
 
 @Plugin(type = Command.class, menuPath = "Plugins>Sandbox>Print text")
 public class PrintTextCommand implements Command
