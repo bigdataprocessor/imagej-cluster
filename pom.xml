@@ -90,6 +90,9 @@
 
 		<imagej-utils.version>0.5.4</imagej-utils.version>
 		<jsch.version>0.1.54</jsch.version>
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 	</properties>
 
 	<dependencies>
