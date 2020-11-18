@@ -11,23 +11,9 @@
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-cluster</artifactId>
 	<version>0.6.3-SNAPSHPOT</version>
-<!--	<build>-->
-<!--		<plugins>-->
-<!--			<plugin>-->
-<!--				<artifactId>maven-jar-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<archive>-->
-<!--						<manifest>-->
-<!--							<mainClass>${main-class}</mainClass>-->
-<!--						</manifest>-->
-<!--					</archive>-->
-<!--					<finalName>cluster</finalName>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
-<!--		</plugins>-->
-<!--	</build>-->
+
 	<name>ImageJ Cluster</name>
-	<description>Submitting and monitoring ImageJ Jobs on a comuputer cluster</description>
+	<description>Submitting and monitoring ImageJ jobs on a computer cluster</description>
 	<url>https://github.com/tischi/imagej-cluster</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -88,7 +74,7 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>EMBL</license.copyrightOwners>
 
-		<imagej-utils.version>0.5.4</imagej-utils.version>
+		<imagej-utils.version>0.5.5</imagej-utils.version>
 		<jsch.version>0.1.54</jsch.version>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
