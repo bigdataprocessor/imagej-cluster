@@ -55,7 +55,7 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:github.com:tischi/imagej-cluster</connection>
+		<connection>scm:git:git@github.com:tischi/imagej-cluster</connection>
 		<developerConnection>scm:git:git@github.com:tischi/imagej-cluster</developerConnection>
 		<tag>HEAD</tag>
 		<url>https://github.com/tischi/imagej-cluster</url>
