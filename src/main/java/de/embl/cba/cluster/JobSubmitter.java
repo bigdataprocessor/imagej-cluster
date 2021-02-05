@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static de.embl.cba.cluster.job.SlurmJobScript.DO_NOT_ECHO;
+import static de.embl.cba.cluster.ssh.SSHConnectorConfig.EMBL_SLURM_HOST;
+import static de.embl.cba.cluster.ssh.SSHConnectorConfig.LOCALHOST;
 
 public class JobSubmitter
 {
@@ -55,29 +57,59 @@ public class JobSubmitter
     public static final String IMAGEJ_EXECUTABLE_CBA_CLUSTER_XVFB = "xvfb-run -a /g/cba/software/Fiji.app/ImageJ-linux64 --mem=MEMORY_MB --allow-multiple --run";
     public static final String IMAGEJ_EXECUTABLE_MAC_OS = "/Applications/Fiji.app/Contents/MacOS/ImageJ-macosx --mem=MEMORY_MB --allow-multiple --run";
 
+    @Deprecated
     private String executionSystem;
-    private String remoteImageJExectuable;
+
+    private final JobExecutor executor;
+    private String imageJExecutable;
 
     private String username;
     private String password;
-    private String remoteJobDirectory;
+    private String jobDirectory;
 
     private ArrayList< String > commands;
     private SSHExecutorService sshExecutorService;
 
-    public JobSubmitter( String executionSystem,
-                         String remoteJobDirectory,
-                         String remoteImageJExectuable,
+    public JobSubmitter( JobExecutor executor,
+                         String jobDirectory,
+                         String imageJExecutable,
                          String username,
                          String password )
     {
-        this.executionSystem = executionSystem;
-        this.remoteImageJExectuable = remoteImageJExectuable;
+        this.executor = executor;
+        this.imageJExecutable = imageJExecutable;
         this.username = username;
         this.password = password;
-        this.remoteJobDirectory = remoteJobDirectory;
+        this.jobDirectory = jobDirectory;
 
         commands = new ArrayList<>();
+    }
+
+    @Deprecated
+    public JobSubmitter( String executionSystem,
+                         String jobDirectory,
+                         String imageJExecutable,
+                         String username,
+                         String password )
+    {
+        this( getJobExecutor( executionSystem ), jobDirectory, imageJExecutable, username, password );
+    }
+
+    @Deprecated
+    private static JobExecutor getJobExecutor( String executionSystem )
+    {
+        final JobExecutor executor = new JobExecutor();
+        if ( executionSystem == EMBL_SLURM_HOST )
+        {
+            executor.hostName = EMBL_SLURM_HOST;
+            executor.scriptType = JobExecutor.ScriptType.SlurmJob;
+        }
+        else if ( executionSystem == LOCALHOST )
+        {
+            executor.hostName = LOCALHOST;
+            executor.scriptType = JobExecutor.ScriptType.LinuxShell;
+        }
+        return executor;
     }
 
     public void clearCommands()
@@ -116,7 +148,7 @@ public class JobSubmitter
     {
         ArrayList< String > finalCommands = new ArrayList<>();
 
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        if ( executor.scriptType.equals( JobExecutor.ScriptType.SlurmJob ) )
         {
             finalCommands.add( "echo $SLURM_JOB_ID" + DO_NOT_ECHO);
             finalCommands.add( "hostname" );
@@ -140,7 +172,7 @@ public class JobSubmitter
             finalCommands.add( finalCommand );
         }
 
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        if ( executor.scriptType.equals( JobExecutor.ScriptType.SlurmJob ) )
         {
             finalCommands.add( "ELAPSED_TIME_IN_SECONDS=$(($SECONDS - $START_TIME))" + DO_NOT_ECHO );
             finalCommands.add( "echo \"Time spent in seconds $ELAPSED_TIME_IN_SECONDS\"" + DO_NOT_ECHO );
@@ -151,7 +183,6 @@ public class JobSubmitter
         JobFuture future = submitJobScript( jobScript );
 
         return future;
-
     }
 
     private JobFuture submitJobScript( JobScript jobScript )
@@ -165,27 +196,13 @@ public class JobSubmitter
     {
         if ( sshExecutorService == null )
         {
-            String hostname = "";
-            String jobSubmissionType = "";
-
-            if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
-            {
-                hostname = SSHConnectorConfig.EMBL_SLURM_HOST;
-                jobSubmissionType = SSHExecutorService.SLURM_JOB;
-
-            } else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )
-            {
-                hostname = SSHConnectorConfig.LOCALHOST;
-                jobSubmissionType = SSHExecutorService.LINUX_JOB;
-            }
-
-            SSHConnectorConfig sshConnectorConfig = new SSHConnectorConfig( username, password, hostname );
+            SSHConnectorConfig sshConnectorConfig = new SSHConnectorConfig( username, password, executor.hostName );
             SSHConnector sshConnector = new SSHConnector( sshConnectorConfig );
 
             sshExecutorService = new SSHExecutorService(
                     sshConnector,
-                    remoteJobDirectory,
-                    jobSubmissionType );
+                    jobDirectory,
+                    executor.scriptType );
         }
 
         return sshExecutorService;
@@ -193,12 +210,12 @@ public class JobSubmitter
 
     private JobScript createJobScript( ArrayList< String > completeCommands, JobSettings jobSettings  )
     {
-        if ( executionSystem.equals( EXECUTION_SYSTEM_EMBL_SLURM ) )
+        if ( executor.scriptType.equals( JobExecutor.ScriptType.SlurmJob ) )
         {
             JobScript jobScript = new SlurmJobScript( completeCommands, jobSettings );
             return jobScript;
         }
-        else if ( executionSystem.equals( EXECUTION_SYSTEM_MAC_OS_LOCALHOST ) )
+        else if ( executor.scriptType.equals( JobExecutor.ScriptType.LinuxShell ) )
         {
             JobScript jobScript = new SimpleLinuxJobScript( completeCommands );
             return jobScript;
@@ -211,6 +228,6 @@ public class JobSubmitter
 
     private String prependIJBinary( String command )
     {
-        return "time " + remoteImageJExectuable + " " + command ;
+        return "time " + imageJExecutable + " " + command ;
     }
 }

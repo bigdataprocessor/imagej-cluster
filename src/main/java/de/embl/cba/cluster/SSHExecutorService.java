@@ -31,7 +31,6 @@ package de.embl.cba.cluster;
 import de.embl.cba.cluster.job.JobScript;
 import de.embl.cba.cluster.ssh.SSHConnector;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -68,7 +67,7 @@ public class SSHExecutorService implements ExecutorService
     public static final String JOB = ".job";
 
     private String jobDirectory;
-    private String jobSubmissionType;
+    private JobExecutor.ScriptType scriptType;
     private String dateTime;
     private int numJobsSubmitted;
 
@@ -79,7 +78,7 @@ public class SSHExecutorService implements ExecutorService
     private String makeScriptExecutableCommand;
     private String createEmptyFileCommand;
 
-    public SSHExecutorService( SSHConnector sshConnector, String jobDirectory, String jobSubmissionType )
+    public SSHExecutorService( SSHConnector sshConnector, String jobDirectory, JobExecutor.ScriptType scriptType )
     {
         setDateAndTime();
 
@@ -87,7 +86,7 @@ public class SSHExecutorService implements ExecutorService
 
         this.jobDirectory = jobDirectory + "/" + dateTime;
 
-        this.jobSubmissionType = jobSubmissionType;
+        this.scriptType = scriptType;
 
         numJobsSubmitted = 0;
 
@@ -229,22 +228,22 @@ public class SSHExecutorService implements ExecutorService
     {
         String jobSubmissionCommand = "";
 
-        if ( jobSubmissionType.equals( SLURM_JOB ) )
+        if ( scriptType.equals( JobExecutor.ScriptType.SlurmJob ) )
         {
             jobSubmissionCommand = SLURM_JOB_SUBMISSION_COMMAND;
         }
-        else if ( jobSubmissionType.equals( LINUX_JOB ) )
+        else if ( scriptType.equals( JobExecutor.ScriptType.LinuxShell  ) )
         {
             jobSubmissionCommand = LINUX_JOB_SUBMISSION_COMMAND;
         }
 
         jobSubmissionCommand += jobDirectory + sshConnector.remoteFileSeparator() + getJobFilename( jobID );
 
-        if ( jobSubmissionType.equals( SLURM_JOB ) )
+        if ( scriptType.equals(  JobExecutor.ScriptType.SlurmJob ) )
         {
             //
         }
-        else if ( jobSubmissionType.equals( LINUX_JOB ) )
+        else if ( scriptType.equals( JobExecutor.ScriptType.LinuxShell ) )
         {
             jobSubmissionCommand += " > " + getJobOutPath( jobID ) + " &";
         }

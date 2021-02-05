@@ -77,12 +77,10 @@ public class PrintTextOnCluster implements Command
     @Parameter (label = "Time per job in minutes" )
     public int timePerJobInMinutes = 3;
 
-
     IJLazySwingLogger logger = new IJLazySwingLogger();
 
     public void run()
     {
-
         logger.setLogService( logService );
 
         ArrayList< JobFuture > jobFutures = submitJobsOnSlurm(
@@ -95,13 +93,11 @@ public class PrintTextOnCluster implements Command
                 jobFutures,
                 3,
                 0 );
-
     }
 
     private ArrayList< JobFuture > submitJobsOnSlurm( String imageJ, Path jobDirectory )
     {
-
-        JobSubmitter commandsSubmitter = getImageJCommandsSubmitter( imageJ, jobDirectory );
+        JobSubmitter commandsSubmitter = getImageJJobSubmitter( imageJ, jobDirectory );
 
         JobSettings jobSettings = getJobSettings();
 
@@ -136,7 +132,7 @@ public class PrintTextOnCluster implements Command
         return jobSettings;
     }
 
-    private JobSubmitter getImageJCommandsSubmitter( String imageJ, Path jobDirectory )
+    private JobSubmitter getImageJJobSubmitter( String imageJ, Path jobDirectory )
     {
         return new JobSubmitter(
                 JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
