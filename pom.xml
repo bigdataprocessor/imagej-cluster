@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-cluster</artifactId>
-	<version>0.6.8-SNAPSHOT</version>
+	<version>0.6.8</version>
 
 	<name>ImageJ Cluster</name>
 	<description>Submitting and monitoring ImageJ jobs on a computer cluster</description>
@@ -57,7 +57,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:tischi/imagej-cluster</connection>
 		<developerConnection>scm:git:git@github.com:tischi/imagej-cluster</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imagej-cluster-0.6.8</tag>
 		<url>https://github.com/tischi/imagej-cluster</url>
 	</scm>
 	<issueManagement>
