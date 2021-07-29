@@ -76,10 +76,10 @@ public abstract class AbstractClusterSubmitterCommand implements Command
         jobMonitor.monitorJobProgress( jobFutures, jobStatusMonitoringInterval, maxNumResubmissions );
     }
 
-    protected void createJobSubmitter( String executableWithOptions )
+    protected void createJobSubmitter( String executableWithOptions, JobExecutor jobExecutor )
     {
         jobSubmitter = new JobSubmitter(
-                JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
+                jobExecutor,
                 new File ( jobDirectory, userName ).toString(),
                 executableWithOptions,
                 userName,

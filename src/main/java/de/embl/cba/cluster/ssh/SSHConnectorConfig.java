@@ -30,11 +30,6 @@ package de.embl.cba.cluster.ssh;
 
 public class SSHConnectorConfig
 {
-    @Deprecated
-    public static final String EMBL_SLURM_HOST = "login.cluster.embl.de";
-    @Deprecated
-    public static final String LOCALHOST = "localhost";
-
     private String user;
     private String password;
     private String host;

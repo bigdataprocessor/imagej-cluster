@@ -36,7 +36,6 @@ public class JobExecutor
 		LinuxShell
 	}
 
-	public String hostName;
-	public ScriptType scriptType;
-
+	public String hostName = "login.cluster.embl.de";
+	public ScriptType scriptType = ScriptType.SlurmJob;
 }

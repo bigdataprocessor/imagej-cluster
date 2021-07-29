@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static de.embl.cba.cluster.job.SlurmJobScript.DO_NOT_ECHO;
-import static de.embl.cba.cluster.ssh.SSHConnectorConfig.EMBL_SLURM_HOST;
-import static de.embl.cba.cluster.ssh.SSHConnectorConfig.LOCALHOST;
 
 public class JobSubmitter
 {
@@ -83,33 +81,6 @@ public class JobSubmitter
         this.jobDirectory = jobDirectory;
 
         commands = new ArrayList<>();
-    }
-
-    @Deprecated
-    public JobSubmitter( String executionSystem,
-                         String jobDirectory,
-                         String imageJExecutable,
-                         String username,
-                         String password )
-    {
-        this( getJobExecutor( executionSystem ), jobDirectory, imageJExecutable, username, password );
-    }
-
-    @Deprecated
-    private static JobExecutor getJobExecutor( String executionSystem )
-    {
-        final JobExecutor executor = new JobExecutor();
-        if ( executionSystem == EMBL_SLURM_HOST )
-        {
-            executor.hostName = EMBL_SLURM_HOST;
-            executor.scriptType = JobExecutor.ScriptType.SlurmJob;
-        }
-        else if ( executionSystem == LOCALHOST )
-        {
-            executor.hostName = LOCALHOST;
-            executor.scriptType = JobExecutor.ScriptType.LinuxShell;
-        }
-        return executor;
     }
 
     public void clearCommands()

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+import de.embl.cba.cluster.JobExecutor;
 import de.embl.cba.cluster.JobSubmitter;
 import de.embl.cba.cluster.JobFuture;
 import de.embl.cba.cluster.JobSettings;
@@ -51,7 +52,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-@Plugin(type = Command.class, menuPath = "Plugins>EMBL>Test" )
+//@Plugin(type = Command.class, menuPath = "Plugins>EMBL>Test" )
 public class RotateImageDemo implements Command
 {
 
@@ -154,7 +155,7 @@ public class RotateImageDemo implements Command
     {
         Future future;
         JobSubmitter commandsSubmitter = new JobSubmitter(
-                        JobSubmitter.EXECUTION_SYSTEM_MAC_OS_LOCALHOST,
+                        new JobExecutor(),
                         "/Users/tischer/Documents/tmp",
                         JobSubmitter.IMAGEJ_EXECUTABLE_MAC_OS,
                         "tischer", password );
@@ -174,7 +175,7 @@ public class RotateImageDemo implements Command
     {
 
         JobSubmitter commandsSubmitter = new JobSubmitter(
-            JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
+            new JobExecutor(),
             "/g/cba/cluster/tischer",
             JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_XVFB,
             "tischer", password );

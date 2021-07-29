@@ -47,7 +47,7 @@ import static de.embl.cba.cluster.JobSubmitter.IMAGEJ_EXECTUABLE_ALMF_CLUSTER_HE
 
 /* Simple test, just printing text onto command line */
 
-@Plugin(type = Command.class, menuPath = "Plugins>Sandbox>ClusterTest>Print Text On Cluster" )
+//@Plugin(type = Command.class, menuPath = "Plugins>Sandbox>ClusterTest>Print Text On Cluster" )
 public class PrintTextOnCluster implements Command
 {
     @Parameter
@@ -135,7 +135,7 @@ public class PrintTextOnCluster implements Command
     private JobSubmitter getImageJJobSubmitter( String imageJ, Path jobDirectory )
     {
         return new JobSubmitter(
-                JobSubmitter.EXECUTION_SYSTEM_EMBL_SLURM,
+                new JobExecutor(),
                 PathMapper.asEMBLClusterMounted( jobDirectory.toString() ),
                 imageJ,
                 username,
@@ -157,5 +157,4 @@ public class PrintTextOnCluster implements Command
         ij.ui().showUI();
         ij.command().run( PrintTextOnCluster.class, true );
     }
-
 }
