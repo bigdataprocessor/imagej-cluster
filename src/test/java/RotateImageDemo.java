@@ -135,9 +135,6 @@ public class RotateImageDemo implements Command
             future = submitOnEmblSlurm( RotateImageCommand.PLUGIN_NAME, parameters );
             results = future.get();
             IJ.log( (String) results.get( JobFuture.STD_OUT ) );
-
-
-
         }
         catch ( InterruptedException e )
         {
