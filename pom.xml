@@ -10,7 +10,7 @@
 
 	<groupId>de.embl.cba</groupId>
 	<artifactId>imagej-cluster</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<name>ImageJ Cluster</name>
 	<description>Submitting and monitoring ImageJ jobs on a computer cluster</description>
