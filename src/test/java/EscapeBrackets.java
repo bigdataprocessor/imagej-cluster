@@ -2,7 +2,7 @@
  * #%L
  * Submitting and monitoring ImageJ jobs on a computer cluster
  * %%
- * Copyright (C) 2018 - 2021 EMBL
+ * Copyright (C) 2018 - 2025 EMBL
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
