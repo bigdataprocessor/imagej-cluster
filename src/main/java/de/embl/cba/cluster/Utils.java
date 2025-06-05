@@ -28,8 +28,8 @@
  */
 package de.embl.cba.cluster;
 
-import de.embl.cba.log.IJLazySwingLogger;
-import de.embl.cba.log.Logger;
+import de.embl.cba.cluster.log.IJLazySwingLogger;
+import de.embl.cba.cluster.log.Logger;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

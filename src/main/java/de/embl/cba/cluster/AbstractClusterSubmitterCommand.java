@@ -28,7 +28,7 @@
  */
 package de.embl.cba.cluster;
 
-import de.embl.cba.log.IJLazySwingLogger;
+import de.embl.cba.cluster.log.IJLazySwingLogger;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.widget.TextWidget;

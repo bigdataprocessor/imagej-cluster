@@ -28,7 +28,7 @@
  */
 package de.embl.cba.cluster;
 
-import de.embl.cba.log.Logger;
+import de.embl.cba.cluster.log.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
