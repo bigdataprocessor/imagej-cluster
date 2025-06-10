@@ -12,6 +12,8 @@
 	<artifactId>imagej-cluster</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
 
+<!--	../scijava-scripts/release-version.sh - -skip-version-check - -skip-license-update-->
+
 	<name>ImageJ Cluster</name>
 	<description>Submitting and monitoring ImageJ jobs on a computer cluster</description>
 	<url>https://github.com/bigdataprocessor/imagej-cluster</url>
